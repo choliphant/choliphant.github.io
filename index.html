@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Course artifacts and interactive learning tools by Charles Oliphant.">
+  <title>Charles Oliphant | Course Artifacts</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08111f;
+      --surface: #111d2e;
+      --border: #253650;
+      --text: #eef6ff;
+      --muted: #9cb0c9;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.13), transparent 32rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main { width: min(920px, calc(100% - 40px)); margin: 0 auto; padding: 12vh 0 80px; }
+    .eyebrow { margin: 0 0 14px; color: var(--accent); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+    h1 { max-width: 720px; margin: 0; font-size: clamp(2.5rem, 7vw, 5.5rem); line-height: 0.98; letter-spacing: -0.055em; }
+    .intro { max-width: 610px; margin: 28px 0 56px; color: var(--muted); font-size: 1.08rem; line-height: 1.7; }
+    .section-label { margin-bottom: 16px; color: var(--muted); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+    .course-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--surface), rgba(17, 29, 46, 0.72));
+      color: inherit;
+      text-decoration: none;
+      transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+    }
+    .course-card:hover, .course-card:focus-visible { border-color: var(--accent); background: var(--accent-soft); transform: translateY(-2px); outline: none; }
+    .course-code { margin: 0 0 8px; color: var(--accent); font-size: 0.85rem; font-weight: 750; letter-spacing: 0.08em; }
+    h2 { margin: 0 0 8px; font-size: clamp(1.35rem, 4vw, 2rem); letter-spacing: -0.025em; }
+    .course-card p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .arrow { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 1.35rem; }
+
+    @media (max-width: 580px) {
+      main { padding-top: 9vh; }
+      .course-card { grid-template-columns: 1fr; }
+      .arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Charles Oliphant</p>
+    <h1>Course artifacts, built to explore.</h1>
+    <p class="intro">A growing collection of interactive companions for readings, concepts, and coursework.</p>
+
+    <section aria-labelledby="courses-heading">
+      <div class="section-label" id="courses-heading">Courses</div>
+      <a class="course-card" href="./cs472/">
+        <div>
+          <p class="course-code">CS 472</p>
+          <h2>Advanced Machine Learning</h2>
+          <p>Interactive reading artifacts and visual explanations.</p>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </section>
+  </main>
+</body>
+</html>
