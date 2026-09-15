@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multivariate Gaussian & Covariance Explorer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent2: #f43f5e;
+      --accent3: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px; display: flex; justify-content: center; }
+    .container { max-width: 1100px; width: 100%; display: grid; grid-template-columns: 360px 1fr; gap: 24px; }
+    @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    p.desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; line-height: 1.4; }
+    .control-group { margin-bottom: 16px; }
+    .control-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; }
+    .control-label { color: var(--text); font-weight: 500; }
+    .control-val { color: var(--accent); font-family: monospace; }
+    input[type=range] { width: 100%; accent-color: var(--accent); background: #334155; height: 6px; border-radius: 3px; outline: none; }
+    .matrix-box { background: #0b1120; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.8rem; margin-top: 18px; line-height: 1.5; }
+    .matrix-title { color: var(--muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; }
+    canvas { background: #0b1120; border: 1px solid var(--border); border-radius: 12px; width: 100%; height: auto; aspect-ratio: 1; display: block; }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; font-size: 0.75rem; color: var(--muted); }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-badge { width: 10px; height: 10px; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="panel">
+    <h1>Bivariate Gaussian Explorer</h1>
+    <p class="desc">Interactive visualization for Murphy PML 3.1–3.2. Adjust the mean, variance, correlation, and conditional slice.</p>
+
+    <div class="control-group">
+      <div class="control-header"><span class="control-label">&mu;₁ (Mean X₁)</span><span id="v_mu1" class="control-val">0.0</span></div>
+      <input type="range" id="mu1" min="-3" max="3" step="0.1" value="0">
+    </div>
+    <div class="control-group">
+      <div class="control-header"><span class="control-label">&mu;₂ (Mean X₂)</span><span id="v_mu2" class="control-val">0.0</span></div>
+      <input type="range" id="mu2" min="-3" max="3" step="0.1" value="0">
+    </div>
+    <div class="control-group">
+      <div class="control-header"><span class="control-label">&sigma;₁ (Std Dev X₁)</span><span id="v_sigma1" class="control-val">1.2</span></div>
+      <input type="range" id="sigma1" min="0.4" max="2.5" step="0.05" value="1.2">
+    </div>
+    <div class="control-group">
+      <div class="control-header"><span class="control-label">&sigma;₂ (Std Dev X₂)</span><span id="v_sigma2" class="control-val">1.0</span></div>
+      <input type="range" id="sigma2" min="0.4" max="2.5" step="0.05" value="1.0">
+    </div>
+    <div class="control-group">
+      <div class="control-header"><span class="control-label">&rho; (Correlation)</span><span id="v_rho" class="control-val">0.60</span></div>
+      <input type="range" id="rho" min="-0.95" max="0.95" step="0.01" value="0.6">
+    </div>
+    <div class="control-group">
+      <div class="control-header"><span class="control-label">Slice y₂ (Conditioning)</span><span id="v_sliceY2" class="control-val">1.0</span></div>
+      <input type="range" id="sliceY2" min="-4" max="4" step="0.1" value="1.0">
+    </div>
+
+    <div class="matrix-box">
+      <div class="matrix-title">Covariance Matrix &Sigma;</div>
+      <div id="cov_display"></div>
+      <div class="matrix-title" style="margin-top:8px;">Conditioning: p(y₁ | y₂ = <span id="cond_y2_val">1.0</span>)</div>
+      <div id="cond_display" style="color:var(--accent2)"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <canvas id="plot" width="600" height="600"></canvas>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-badge" style="background:#38bdf8;"></span> 1&sigma;, 2&sigma;, 3&sigma; Contours</div>
+      <div class="legend-item"><span class="legend-badge" style="background:#f43f5e;"></span> Slice y₂ & Conditional &mu;₁|₂</div>
+      <div class="legend-item"><span class="legend-badge" style="background:#10b981;"></span> Eigenvector Axes (PCA)</div>
+      <div class="legend-item"><span class="legend-badge" style="background:#e2e8f0;opacity:0.35;"></span> Monte Carlo Samples</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('plot');
+  const ctx = canvas.getContext('2d');
+
+  const sliders = ['mu1', 'mu2', 'sigma1', 'sigma2', 'rho', 'sliceY2'];
+  const vals = {};
+
+  // Pre-generate standard normal samples for deterministic slider dragging
+  const NUM_SAMPLES = 300;
+  const standardNormals = [];
+  function boxMuller() {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random();
+    while(v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  }
+  for (let i = 0; i < NUM_SAMPLES; i++) {
+    standardNormals.push({ z1: boxMuller(), z2: boxMuller() });
+  }
+
+  function toScreen(x, y) {
+    const scale = 50; // pixels per unit
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    return { x: cx + x * scale, y: cy - y * scale };
+  }
+
+  function readInputs() {
+    sliders.forEach(id => {
+      vals[id] = parseFloat(document.getElementById(id).value);
+      document.getElementById('v_' + id).innerText = vals[id].toFixed(2);
+    });
+    document.getElementById('cond_y2_val').innerText = vals.sliceY2.toFixed(1);
+  }
+
+  function render() {
+    readInputs();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const { mu1, mu2, sigma1, sigma2, rho, sliceY2 } = vals;
+    const cov12 = rho * sigma1 * sigma2;
+    const var1 = sigma1 * sigma1;
+    const var2 = sigma2 * sigma2;
+
+    // Display Covariance & Conditioning
+    document.getElementById('cov_display').innerHTML = 
+      `[ ${var1.toFixed(2)}, ${cov12.toFixed(2)} ]<br>[ ${cov12.toFixed(2)}, ${var2.toFixed(2)} ]`;
+    
+    const condMean = mu1 + (cov12 / var2) * (sliceY2 - mu2);
+    const condVar = var1 * (1 - rho * rho);
+    document.getElementById('cond_display').innerHTML = 
+      `&mu;₁|₂ = ${condMean.toFixed(2)} | &sigma;²₁|₂ = ${condVar.toFixed(2)}`;
+
+    // Draw Grid & Axes
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 1;
+    for (let g = -6; g <= 6; g++) {
+      let p1 = toScreen(g, -6), p2 = toScreen(g, 6);
+      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+      p1 = toScreen(-6, g); p2 = toScreen(6, g);
+      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+    }
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1.5;
+    let ox1 = toScreen(-6, 0), ox2 = toScreen(6, 0);
+    ctx.beginPath(); ctx.moveTo(ox1.x, ox1.y); ctx.lineTo(ox2.x, ox2.y); ctx.stroke();
+    let oy1 = toScreen(0, -6), oy2 = toScreen(0, 6);
+    ctx.beginPath(); ctx.moveTo(oy1.x, oy1.y); ctx.lineTo(oy2.x, oy2.y); ctx.stroke();
+
+    // Transform and Draw Monte Carlo Samples using Cholesky Decomposition
+    // L = [[s1, 0], [rho*s2, s2*sqrt(1-rho^2)]]
+    const l11 = sigma1, l21 = rho * sigma2, l22 = sigma2 * Math.sqrt(Math.max(0, 1 - rho * rho));
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.25)';
+    standardNormals.forEach(s => {
+      const y1 = mu1 + l11 * s.z1;
+      const y2 = mu2 + l21 * s.z1 + l22 * s.z2;
+      const pt = toScreen(y1, y2);
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 2.5, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+
+    // Compute Eigenvalues & Eigenvectors for the 2x2 Covariance Matrix
+    const tr = var1 + var2;
+    const det = var1 * var2 - cov12 * cov12;
+    const disc = Math.sqrt(Math.max(0, tr * tr / 4 - det));
+    const lambda1 = tr / 2 + disc;
+    const lambda2 = tr / 2 - disc;
+
+    let v1 = { x: 1, y: 0 };
+    if (Math.abs(cov12) > 1e-6) {
+      v1 = { x: lambda1 - var2, y: cov12 };
+      const norm = Math.hypot(v1.x, v1.y);
+      v1.x /= norm; v1.y /= norm;
+    } else if (var1 < var2) {
+      v1 = { x: 0, y: 1 };
+    }
+    const v2 = { x: -v1.y, y: v1.x };
+
+    // Draw Eigenvector Directions
+    const meanPt = toScreen(mu1, mu2);
+    [ { v: v1, l: lambda1 }, { v: v2, l: lambda2 } ].forEach(e => {
+      const r = 2 * Math.sqrt(Math.max(0, e.l));
+      const end = toScreen(mu1 + e.v.x * r, mu2 + e.v.y * r);
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(meanPt.x, meanPt.y); ctx.lineTo(end.x, end.y); ctx.stroke();
+    });
+
+    // Draw Mahalanobis Contours (k = 1, 2, 3 sigma)
+    const angle = Math.atan2(v1.y, v1.x);
+    [1, 2, 3].forEach(k => {
+      ctx.strokeStyle = `rgba(56, 189, 248, ${0.9 - k * 0.22})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let t = 0; t <= 2 * Math.PI + 0.05; t += 0.05) {
+        const ellX = k * Math.sqrt(Math.max(0, lambda1)) * Math.cos(t);
+        const ellY = k * Math.sqrt(Math.max(0, lambda2)) * Math.sin(t);
+        const rotX = ellX * Math.cos(angle) - ellY * Math.sin(angle);
+        const rotY = ellX * Math.sin(angle) + ellY * Math.cos(angle);
+        const pt = toScreen(mu1 + rotX, mu2 + rotY);
+        if (t === 0) ctx.moveTo(pt.x, pt.y); else ctx.lineTo(pt.x, pt.y);
+      }
+      ctx.stroke();
+    });
+
+    // Draw Conditioning Slice Line y2 = sliceY2
+    ctx.strokeStyle = '#f43f5e';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+    const s1 = toScreen(-6, sliceY2), s2 = toScreen(6, sliceY2);
+    ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(s2.x, s2.y); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw Conditional Mean Point
+    const condPt = toScreen(condMean, sliceY2);
+    ctx.fillStyle = '#f43f5e';
+    ctx.beginPath(); ctx.arc(condPt.x, condPt.y, 5, 0, 2 * Math.PI); ctx.fill();
+
+    // Draw Mean Center
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath(); ctx.arc(meanPt.x, meanPt.y, 4, 0, 2 * Math.PI); ctx.fill();
+  }
+
+  sliders.forEach(id => document.getElementById(id).addEventListener('input', render));
+  render();
+</script>
+</body>
+</html>
