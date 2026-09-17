@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS 473: Mixture Models &amp; Bias-Variance Explorer</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #151d30;
+      --border: #24324f;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --c1: #38bdf8;
+      --c2: #f43f5e;
+      --c3: #10b981;
+      --c4: #fbbf24;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; }
+    .wrapper { max-width: 1100px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+    header { background: var(--card); border: 1px solid var(--border); padding: 18px 24px; border-radius: 12px; }
+    header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
+    header p { color: var(--muted); font-size: 0.9rem; }
+    .tabs { display: flex; gap: 10px; margin-top: 10px; }
+    .tab-btn { background: #1e293b; color: var(--muted); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+    .tab-btn.active { background: var(--c1); color: #000; border-color: var(--c1); }
+    .tab-content { display: none; grid-template-columns: 340px 1fr; gap: 20px; }
+    .tab-content.active { display: grid; }
+    @media (max-width: 860px) { .tab-content { grid-template-columns: 1fr; } }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .control-row { margin-bottom: 14px; }
+    .control-head { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 5px; }
+    .control-val { font-family: monospace; color: var(--c1); }
+    input[type=range] { width: 100%; accent-color: var(--c1); background: #334155; height: 5px; border-radius: 3px; outline: none; }
+    .info-card { background: #0c1222; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 14px; font-family: monospace; font-size: 0.8rem; line-height: 1.5; color: var(--muted); }
+    .info-card strong { color: var(--text); }
+    canvas { background: #0c1222; border: 1px solid var(--border); border-radius: 12px; width: 100%; aspect-ratio: 1; display: block; }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; font-size: 0.75rem; color: var(--muted); }
+    .badge { width: 10px; height: 10px; border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 4px; }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <header>
+    <h1>PML Interactive Companion: Chapters 3.5 & 4.7.6</h1>
+    <p>Explore Gaussian Mixture Models, Posterior Responsibilities, and the Bias-Variance Tradeoff.</p>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('gmm')">3.5 Gaussian Mixture Models</button>
+      <button class="tab-btn" onclick="switchTab('bv')">4.7.6 Bias-Variance Tradeoff</button>
+    </div>
+  </header>
+
+  <!-- TAB 1: GMM (3.5) -->
+  <div id="tab-gmm" class="tab-content active">
+    <div class="panel">
+      <h2 style="font-size:1.1rem; margin-bottom:12px;">GMM Parameters</h2>
+      <div class="control-row">
+        <div class="control-head"><span>Number of Clusters (K)</span><span id="v_k" class="control-val">3</span></div>
+        <input type="range" id="k_clusters" min="1" max="4" step="1" value="3">
+      </div>
+      <div class="control-row">
+        <div class="control-head"><span>Cluster Separation</span><span id="v_sep" class="control-val">2.8</span></div>
+        <input type="range" id="cluster_sep" min="1.0" max="4.5" step="0.1" value="2.8">
+      </div>
+      <div class="control-row">
+        <div class="control-head"><span>Component Variance (&sigma;&sup2;)</span><span id="v_gvar" class="control-val">0.65</span></div>
+        <input type="range" id="comp_var" min="0.2" max="1.5" step="0.05" value="0.65">
+      </div>
+      <div class="control-row">
+        <div class="control-head"><span>Soft vs. Hard Responsibilities</span><span id="v_hard" class="control-val">Soft</span></div>
+        <input type="range" id="hard_switch" min="0" max="1" step="1" value="0">
+      </div>
+      <button class="tab-btn" style="width:100%; margin-top:6px;" onclick="resampleGMM()">Resample Points</button>
+
+      <div class="info-card" id="gmm_math">
+        <strong>Posterior Responsibility r_nk:</strong><br>
+        r_nk = p(z=k|y_n) &prop; &pi;_k N(y_n | &mu;_k, &Sigma;_k)<br><br>
+        <strong>K-Means Equivalence:</strong><br>
+        When &Sigma;_k = &sigma;&sup2;I and &pi;_k = 1/K as &sigma;&sup2; &rarr; 0, assignments become hard Euclidean nearest-centroid choices.
+      </div>
+    </div>
+    <div class="panel">
+      <canvas id="gmmPlot" width="550" height="550"></canvas>
+      <div class="legend">
+        <span><span class="badge" style="background:var(--c1)"></span> Comp 1</span>
+        <span><span class="badge" style="background:var(--c2)"></span> Comp 2</span>
+        <span><span class="badge" style="background:var(--c3)"></span> Comp 3</span>
+        <span><span class="badge" style="background:var(--c4)"></span> Comp 4</span>
+        <span style="margin-left:auto;">Circles: 2&sigma; Contours</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Bias-Variance (4.7.6) -->
+  <div id="tab-bv" class="tab-content">
+    <div class="panel">
+      <h2 style="font-size:1.1rem; margin-bottom:12px;">Bias-Variance Controls</h2>
+      <div class="control-row">
+        <div class="control-head"><span>Polynomial Degree (Complexity)</span><span id="v_deg" class="control-val">3</span></div>
+        <input type="range" id="poly_deg" min="1" max="10" step="1" value="3">
+      </div>
+      <div class="control-row">
+        <div class="control-head"><span>Observation Noise (&sigma;)</span><span id="v_noise" class="control-val">0.35</span></div>
+        <input type="range" id="noise_lvl" min="0.05" max="0.8" step="0.05" value="0.35">
+      </div>
+      <div class="control-row">
+        <div class="control-head"><span>Training Set Size (N)</span><span id="v_n" class="control-val">15</span></div>
+        <input type="range" id="sample_n" min="8" max="40" step="1" value="15">
+      </div>
+      <button class="tab-btn" style="width:100%; margin-top:6px;" onclick="simulateBV()">Rerun Ensemble (50 Datasets)</button>
+
+      <div class="info-card">
+        <strong>MSE Decomposition:</strong><br>
+        MSE = Bias&sup2; + Variance + Noise Floor (&sigma;&sup2;)<br><br>
+        <span id="bv_stat_bias">Bias&sup2;: --</span><br>
+        <span id="bv_stat_var">Variance: --</span><br>
+        <span id="bv_stat_mse" style="color:var(--c1);">Total MSE: --</span>
+      </div>
+    </div>
+    <div class="panel">
+      <canvas id="bvPlot" width="550" height="550"></canvas>
+      <div class="legend">
+        <span><span class="badge" style="background:#fff"></span> True f*(x)</span>
+        <span><span class="badge" style="background:var(--c2)"></span> Mean Model E[f(x)]</span>
+        <span><span class="badge" style="background:rgba(56,189,248,0.25)"></span> Model Variance Band</span>
+        <span><span class="badge" style="background:#fbbf24"></span> Active Sample D</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i===0 && name==='gmm') || (i===1 && name==='bv')));
+    document.getElementById('tab-gmm').classList.toggle('active', name === 'gmm');
+    document.getElementById('tab-bv').classList.toggle('active', name === 'bv');
+    if (name === 'gmm') renderGMM(); else simulateBV();
+  }
+
+  /* ================= 3.5 GMM SIMULATION ================= */
+  const gCanvas = document.getElementById('gmmPlot');
+  const gCtx = gCanvas.getContext('2d');
+  let gmmSamples = [];
+
+  function randn() {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random();
+    while(v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  }
+
+  function resampleGMM() {
+    gmmSamples = [];
+    for (let i = 0; i < 280; i++) gmmSamples.push({ z1: randn(), z2: randn(), u: Math.random() });
+    renderGMM();
+  }
+
+  function getCentroids(K, sep) {
+    const coords = [
+      [-sep * 0.7, -sep * 0.5],
+      [ sep * 0.7, -sep * 0.5],
+      [ 0,          sep * 0.8],
+      [-sep * 0.8,  sep * 0.6]
+    ];
+    return coords.slice(0, K);
+  }
+
+  function renderGMM() {
+    const K = parseInt(document.getElementById('k_clusters').value);
+    const sep = parseFloat(document.getElementById('cluster_sep').value);
+    const variance = parseFloat(document.getElementById('comp_var').value);
+    const hard = parseInt(document.getElementById('hard_switch').value);
+
+    document.getElementById('v_k').innerText = K;
+    document.getElementById('v_sep').innerText = sep.toFixed(1);
+    document.getElementById('v_gvar').innerText = variance.toFixed(2);
+    document.getElementById('v_hard').innerText = hard ? "Hard (Argmax)" : "Soft (Posterior Prob)";
+
+    gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+    const cx = gCanvas.width / 2, cy = gCanvas.height / 2, scale = 48;
+    const toS = (x, y) => ({ x: cx + x * scale, y: cy - y * scale });
+
+    // Grid
+    gCtx.strokeStyle = '#1e293b';
+    gCtx.lineWidth = 1;
+    for (let i = -5; i <= 5; i++) {
+      let p1 = toS(i, -5), p2 = toS(i, 5);
+      gCtx.beginPath(); gCtx.moveTo(p1.x, p1.y); gCtx.lineTo(p2.x, p2.y); gCtx.stroke();
+      p1 = toS(-5, i); p2 = toS(5, i);
+      gCtx.beginPath(); gCtx.moveTo(p1.x, p1.y); gCtx.lineTo(p2.x, p2.y); gCtx.stroke();
+    }
+
+    const centroids = getCentroids(K, sep);
+    const colors = [
+      [56, 189, 248],  // c1
+      [244, 63, 94],   // c2
+      [16, 185, 129],  // c3
+      [251, 191, 36]   // c4
+    ];
+
+    if (gmmSamples.length === 0) resampleGMM();
+
+    // Draw Data Points with Soft Responsibilities or Hard Clustering
+    const std = Math.sqrt(variance);
+    gmmSamples.forEach(s => {
+      // Generative draw
+      const compIdx = Math.floor(s.u * K);
+      const mu = centroids[compIdx];
+      const y1 = mu[0] + s.z1 * std;
+      const y2 = mu[1] + s.z2 * std;
+
+      // Compute responsibility r_nk
+      let probs = [];
+      let sumP = 0;
+      for (let k = 0; k < K; k++) {
+        const dx = y1 - centroids[k][0], dy = y2 - centroids[k][1];
+        const distSq = dx * dx + dy * dy;
+        const p = Math.exp(-0.5 * distSq / variance);
+        probs.push(p);
+        sumP += p;
+      }
+      const r = probs.map(p => p / (sumP + 1e-9));
+
+      let cr = 0, cg = 0, cb = 0;
+      if (hard) {
+        let maxK = 0;
+        for (let k = 1; k < K; k++) if (r[k] > r[maxK]) maxK = k;
+        [cr, cg, cb] = colors[maxK];
+      } else {
+        for (let k = 0; k < K; k++) {
+          cr += r[k] * colors[k][0];
+          cg += r[k] * colors[k][1];
+          cb += r[k] * colors[k][2];
+        }
+      }
+
+      const scr = toS(y1, y2);
+      gCtx.fillStyle = `rgba(${Math.round(cr)}, ${Math.round(cg)}, ${Math.round(cb)}, 0.8)`;
+      gCtx.beginPath();
+      gCtx.arc(scr.x, scr.y, 3.5, 0, Math.PI * 2);
+      gCtx.fill();
+    });
+
+    // Draw 2-Sigma Contours and Centroids
+    centroids.forEach((c, idx) => {
+      const p = toS(c[0], c[1]);
+      const [cr, cg, cb] = colors[idx];
+      gCtx.strokeStyle = `rgba(${cr}, ${cg}, ${cb}, 0.85)`;
+      gCtx.lineWidth = 2;
+      gCtx.beginPath();
+      gCtx.arc(p.x, p.y, 2 * std * scale, 0, Math.PI * 2);
+      gCtx.stroke();
+
+      gCtx.fillStyle = '#ffffff';
+      gCtx.beginPath();
+      gCtx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+      gCtx.fill();
+    });
+  }
+
+  /* ================= 4.7.6 BIAS-VARIANCE SIMULATION ================= */
+  const bvCanvas = document.getElementById('bvPlot');
+  const bvCtx = bvCanvas.getContext('2d');
+
+  function trueFunc(x) { return 0.5 * Math.sin(2.5 * x) + 0.3 * x; }
+
+  // OLS polynomial fit
+  function polyFit(xs, ys, deg) {
+    const m = deg + 1;
+    let XtX = Array.from({length: m}, () => Array(m).fill(0));
+    let XtY = Array(m).fill(0);
+
+    for (let i = 0; i < xs.length; i++) {
+      let xpow = [1];
+      for (let p = 1; p <= 2 * deg; p++) xpow.push(xpow[p-1] * xs[i]);
+      for (let r = 0; r < m; r++) {
+        for (let c = 0; c < m; c++) XtX[r][c] += xpow[r + c];
+        XtY[r] += ys[i] * xpow[r];
+      }
+    }
+    // Regularize slightly for high-degree stability
+    for (let r = 0; r < m; r++) XtX[r][r] += 1e-4;
+
+    // Gauss-Jordan elimination
+    for (let i = 0; i < m; i++) {
+      let maxR = i;
+      for (let r = i + 1; r < m; r++) if (Math.abs(XtX[r][i]) > Math.abs(XtX[maxR][i])) maxR = r;
+      [XtX[i], XtX[maxR]] = [XtX[maxR], XtX[i]];
+      [XtY[i], XtY[maxR]] = [XtY[maxR], XtY[i]];
+
+      let div = XtX[i][i];
+      for (let c = i; c < m; c++) XtX[i][c] /= div;
+      XtY[i] /= div;
+
+      for (let r = 0; r < m; r++) {
+        if (r !== i) {
+          let factor = XtX[r][i];
+          for (let c = i; c < m; c++) XtX[r][c] -= factor * XtX[i][c];
+          XtY[r] -= factor * XtY[i];
+        }
+      }
+    }
+    return XtY; // polynomial coefficients
+  }
+
+  function evalPoly(w, x) {
+    let y = 0, xp = 1;
+    for (let i = 0; i < w.length; i++) { y += w[i] * xp; xp *= x; }
+    return y;
+  }
+
+  function simulateBV() {
+    const deg = parseInt(document.getElementById('poly_deg').value);
+    const noise = parseFloat(document.getElementById('noise_lvl').value);
+    const N = parseInt(document.getElementById('sample_n').value);
+
+    document.getElementById('v_deg').innerText = deg;
+    document.getElementById('v_noise').innerText = noise.toFixed(2);
+    document.getElementById('v_n').innerText = N;
+
+    bvCtx.clearRect(0, 0, bvCanvas.width, bvCanvas.height);
+    const cx = bvCanvas.width / 2, cy = bvCanvas.height / 2;
+    const toS = (x, y) => ({ x: cx + (x / 1.3) * (bvCanvas.width * 0.42), y: cy - (y / 1.2) * (bvCanvas.height * 0.42) });
+
+    // Axes
+    bvCtx.strokeStyle = '#24324f';
+    bvCtx.lineWidth = 1;
+    let ox1 = toS(-1.2, 0), ox2 = toS(1.2, 0);
+    bvCtx.beginPath(); bvCtx.moveTo(ox1.x, ox1.y); bvCtx.lineTo(ox2.x, ox2.y); bvCtx.stroke();
+    let oy1 = toS(0, -1.2), oy2 = toS(0, 1.2);
+    bvCtx.beginPath(); bvCtx.moveTo(oy1.x, oy1.y); bvCtx.lineTo(oy2.x, oy2.y); bvCtx.stroke();
+
+    const NUM_MODELS = 50;
+    const testPoints = [];
+    for (let x = -1.0; x <= 1.0; x += 0.04) testPoints.push(x);
+    const modelPredictions = Array.from({length: NUM_MODELS}, () => []);
+    let activeSample = { xs: [], ys: [] };
+
+    // Train 50 models on independent random datasets
+    for (let m = 0; m < NUM_MODELS; m++) {
+      let xs = [], ys = [];
+      for (let i = 0; i < N; i++) {
+        let x = (Math.random() * 2) - 1.0;
+        let y = trueFunc(x) + randn() * noise;
+        xs.push(x); ys.push(y);
+      }
+      if (m === 0) activeSample = { xs, ys };
+      const w = polyFit(xs, ys, deg);
+      testPoints.forEach(tx => modelPredictions[m].push(evalPoly(w, tx)));
+    }
+
+    // Mean prediction, Bias^2, and Variance computation across x
+    let totalBiasSq = 0, totalVar = 0;
+    const meanPreds = [], varPreds = [];
+
+    for (let p = 0; p < testPoints.length; p++) {
+      const tx = testPoints[p];
+      const target = trueFunc(tx);
+      let sum = 0;
+      for (let m = 0; m < NUM_MODELS; m++) sum += modelPredictions[m][p];
+      const mean = sum / NUM_MODELS;
+      meanPreds.push(mean);
+
+      let vSum = 0;
+      for (let m = 0; m < NUM_MODELS; m++) vSum += (modelPredictions[m][p] - mean) ** 2;
+      const v = vSum / NUM_MODELS;
+      varPreds.push(v);
+
+      totalBiasSq += (mean - target) ** 2;
+      totalVar += v;
+    }
+
+    totalBiasSq /= testPoints.length;
+    totalVar /= testPoints.length;
+    const totalMSE = totalBiasSq + totalVar + (noise * noise);
+
+    document.getElementById('bv_stat_bias').innerText = `Bias²: ${totalBiasSq.toFixed(4)}`;
+    document.getElementById('bv_stat_var').innerText = `Variance: ${totalVar.toFixed(4)}`;
+    document.getElementById('bv_stat_mse').innerText = `Total Test MSE: ${totalMSE.toFixed(4)} (Noise σ²: ${(noise*noise).toFixed(3)})`;
+
+    // 1. Draw Individual Models (light blue background traces)
+    bvCtx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+    bvCtx.lineWidth = 1;
+    for (let m = 0; m < NUM_MODELS; m++) {
+      bvCtx.beginPath();
+      testPoints.forEach((x, idx) => {
+        let pt = toS(x, Math.max(-1.5, Math.min(1.5, modelPredictions[m][idx])));
+        if (idx === 0) bvCtx.moveTo(pt.x, pt.y); else bvCtx.lineTo(pt.x, pt.y);
+      });
+      bvCtx.stroke();
+    }
+
+    // 2. Draw Variance Band (+- 1 std dev of model prediction)
+    bvCtx.fillStyle = 'rgba(56, 189, 248, 0.18)';
+    bvCtx.beginPath();
+    for (let p = 0; p < testPoints.length; p++) {
+      let sd = Math.sqrt(varPreds[p]);
+      let pt = toS(testPoints[p], meanPreds[p] + sd);
+      if (p === 0) bvCtx.moveTo(pt.x, pt.y); else bvCtx.lineTo(pt.x, pt.y);
+    }
+    for (let p = testPoints.length - 1; p >= 0; p--) {
+      let sd = Math.sqrt(varPreds[p]);
+      let pt = toS(testPoints[p], meanPreds[p] - sd);
+      bvCtx.lineTo(pt.x, pt.y);
+    }
+    bvCtx.closePath();
+    bvCtx.fill();
+
+    // 3. Draw Active Sample Points
+    activeSample.xs.forEach((x, i) => {
+      let pt = toS(x, activeSample.ys[i]);
+      bvCtx.fillStyle = '#fbbf24';
+      bvCtx.beginPath(); bvCtx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2); bvCtx.fill();
+    });
+
+    // 4. Draw True Target Function f*(x)
+    bvCtx.strokeStyle = '#ffffff';
+    bvCtx.lineWidth = 2.5;
+    bvCtx.beginPath();
+    testPoints.forEach((x, idx) => {
+      let pt = toS(x, trueFunc(x));
+      if (idx === 0) bvCtx.moveTo(pt.x, pt.y); else bvCtx.lineTo(pt.x, pt.y);
+    });
+    bvCtx.stroke();
+
+    // 5. Draw Mean Model Prediction E[f(x)]
+    bvCtx.strokeStyle = '#f43f5e';
+    bvCtx.lineWidth = 2.5;
+    bvCtx.setLineDash([5, 4]);
+    bvCtx.beginPath();
+    testPoints.forEach((x, idx) => {
+      let pt = toS(x, meanPreds[idx]);
+      if (idx === 0) bvCtx.moveTo(pt.x, pt.y); else bvCtx.lineTo(pt.x, pt.y);
+    });
+    bvCtx.stroke();
+    bvCtx.setLineDash([]);
+  }
+
+  // Hook event listeners
+  ['k_clusters', 'cluster_sep', 'comp_var', 'hard_switch'].forEach(id => {
+    document.getElementById(id).addEventListener('input', renderGMM);
+  });
+  ['poly_deg', 'noise_lvl', 'sample_n'].forEach(id => {
+    document.getElementById(id).addEventListener('input', simulateBV);
+  });
+
+  resampleGMM();
+</script>
+</body>
+</html>
