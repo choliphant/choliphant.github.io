@@ -18,6 +18,13 @@ After a pull request is merged into `main`, GitHub will publish the update
 automatically. The first deployment or a later update can take a few minutes to
 appear.
 
+## Adding the resume
+
+Add the finished PDF to the repository root with the exact filename
+`resume.pdf`. The homepage will automatically replace the placeholder with an
+embedded resume viewer plus open and download buttons. No homepage code changes
+are required.
+
 If the page does not publish, open the repository on GitHub and go to
 **Settings → Pages**. Under **Build and deployment**, choose **Deploy from a
 branch**, then select the `main` branch and `/ (root)` folder.
