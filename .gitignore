@@ -13,6 +13,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Local project guidance and work record
+/AGENTS.md
+/WORKLOG.md
+
 # Dependencies
 node_modules/
 
