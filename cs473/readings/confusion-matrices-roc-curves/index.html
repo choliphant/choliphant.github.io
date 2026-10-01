@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CS 473 Study Module: Confusion Matrices & ROC Curves</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --primary: #38bdf8;
+      --accent: #818cf8;
+      --success: #34d399;
+      --danger: #f87171;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem; line-height: 1.5; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1, h2, h3 { color: #fff; font-weight: 700; margin-top: 0; }
+    .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 2rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+    
+    /* Interactive Simulator */
+    canvas { background: #0b1120; border-radius: 0.5rem; border: 1px solid var(--border); width: 100%; height: auto; }
+    .slider-container { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; }
+    input[type=range] { flex: 1; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.9rem; }
+    th, td { border: 1px solid var(--border); padding: 0.6rem; text-align: center; }
+    th { background: rgba(56, 189, 248, 0.1); color: var(--primary); }
+    .highlight-cell { background: rgba(129, 140, 248, 0.15); font-weight: bold; }
+
+    /* Quiz Elements */
+    .question { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+    .question:last-child { border-bottom: none; }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
+    .opt-btn { background: #111827; border: 1px solid var(--border); color: var(--text); padding: 0.75rem 1rem; border-radius: 0.5rem; text-align: left; cursor: pointer; transition: 0.2s; }
+    .opt-btn:hover { border-color: var(--primary); background: #1f2937; }
+    .explanation { margin-top: 0.75rem; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.88rem; display: none; }
+    .correct { background: rgba(52, 211, 153, 0.15); border: 1px solid var(--success); color: var(--success); }
+    .wrong { background: rgba(248, 113, 113, 0.15); border: 1px solid var(--danger); color: var(--danger); }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+    .badge-learn { background: rgba(56, 189, 248, 0.2); color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="margin-bottom: 2rem;">
+      <span class="badge badge-learn">Murphy PML §5.1.3 – §5.1.3.2</span>
+      <h1 style="margin-top: 0.5rem;">ROC Curves & Rate Dynamics Laboratory</h1>
+      <p style="color: var(--muted);">Explore the relationship between classification thresholds, confusion matrix rates, and ROC trajectories through an interactive visual simulator and diagnostic quiz.</p>
+    </div>
+
+    <!-- Interactive Simulation Card -->
+    <div class="card">
+      <h2>1. Dynamic ROC Simulation & Mechanics</h2>
+      <p style="font-size: 0.9rem; color: var(--muted);">
+        A classifier outputs probabilities for $N=10$ samples ($5$ Positives, $5$ Negatives). Adjust the threshold <strong>&tau;</strong> to see how points shift between predicted classes, tracing the ROC curve.
+      </p>
+
+      <div class="grid-2">
+        <div>
+          <canvas id="rocCanvas" width="400" height="400"></canvas>
+          <div class="slider-container">
+            <label for="threshSlider"><strong>&tau;: <span id="threshVal">0.50</span></strong></label>
+            <input type="range" id="threshSlider" min="0" max="1" step="0.01" value="0.50" />
+          </div>
+        </div>
+        <div>
+          <h3>Live Matrix & Rates</h3>
+          <table>
+            <tr><th></th><th>Actual Pos (Y=1)</th><th>Actual Neg (Y=0)</th></tr>
+            <tr><th>Pred Pos (&ge; &tau;)</th><td id="mTP" class="highlight-cell">0</td><td id="mFP">0</td></tr>
+            <tr><th>Pred Neg (&lt; &tau;)</th><td id="mFN">0</td><td id="mTN" class="highlight-cell">0</td></tr>
+          </table>
+
+          <div style="margin-top: 1rem; font-size: 0.9rem;">
+            <p><strong>TPR (Recall, Sensitivity):</strong> <span id="statTPR" style="color: var(--primary);">0</span><br>
+            <small style="color: var(--muted);">TP / (TP + FN) = Fraction of true positives detected</small></p>
+            
+            <p><strong>FPR (Fall-out):</strong> <span id="statFPR" style="color: var(--danger);">0</span><br>
+            <small style="color: var(--muted);">FP / (FP + TN) = 1 - Specificity = False alarms among true negatives</small></p>
+
+            <p><strong>AUC (Scalar summary):</strong> <span id="statAUC" style="color: var(--success);">0.92</span><br>
+            <small style="color: var(--muted);">Probability that a random positive scores higher than a random negative.</small></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Quiz -->
+    <div class="card">
+      <h2>2. Mastery Assessment Quiz</h2>
+
+      <!-- Q1 -->
+      <div class="question" id="q1">
+        <p><strong>Q1: Extreme Threshold Dynamics</strong><br>
+        If you set the decision threshold &tau; to be greater than all sample scores (&tau; &gt; 1.0), what is the resulting (FPR, TPR) coordinate on the ROC space?</p>
+        <div class="options">
+          <button class="opt-btn" onclick="checkQ('q1', 0, false)">A) (1.0, 1.0)</button>
+          <button class="opt-btn" onclick="checkQ('q1', 1, true)">B) (0.0, 0.0)</button>
+          <button class="opt-btn" onclick="checkQ('q1', 2, false)">C) (0.0, 1.0)</button>
+          <button class="opt-btn" onclick="checkQ('q1', 3, false)">D) (1.0, 0.0)</button>
+        </div>
+        <div class="explanation">
+          <strong>Correct!</strong> When &tau; &gt; max(score), the model predicts every single sample as <strong>Negative</strong>. Therefore, TP = 0 (so TPR = 0) and FP = 0 (so FPR = 0). The curve always begins at <code>(0, 0)</code>.
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="question" id="q2">
+        <p><strong>Q2: Metric Dependencies</strong><br>
+        Why does a severe class imbalance (e.g., test set contains 99% negatives and 1% positives) leave the ROC curve unchanged compared to a balanced set with identical score distributions per class?</p>
+        <div class="options">
+          <button class="opt-btn" onclick="checkQ('q2', 0, false)">A) Because precision scales proportionally with recall.</button>
+          <button class="opt-btn" onclick="checkQ('q2', 1, true)">B) TPR and FPR normalize independently by condition positive (TP+FN) and condition negative (FP+TN).</button>
+          <button class="opt-btn" onclick="checkQ('q2', 2, false)">C) ROC curves automatically downsample the majority class.</button>
+        </div>
+        <div class="explanation">
+          <strong>Correct!</strong> TPR evaluates performance strictly across the column of true positives, and FPR evaluates performance strictly across true negatives. Changes in class prevalence do not shift the marginal rates $p(\hat{Y}=1|Y=1)$ and $p(\hat{Y}=1|Y=0)$.
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="question" id="q3">
+        <p><strong>Q3: Calculating Rates</strong><br>
+        Suppose a validation set has 50 true positives and 50 true negatives. At a given threshold, the classifier produces <strong>10 False Positives</strong> and <strong>5 False Negatives</strong>. What are the TPR and TNR?</p>
+        <div class="options">
+          <button class="opt-btn" onclick="checkQ('q3', 0, true)">A) TPR = 0.90, TNR = 0.80</button>
+          <button class="opt-btn" onclick="checkQ('q3', 1, false)">B) TPR = 0.80, TNR = 0.90</button>
+          <button class="opt-btn" onclick="checkQ('q3', 2, false)">C) TPR = 0.90, TNR = 0.20</button>
+        </div>
+        <div class="explanation">
+          <strong>Correct!</strong><br>
+          Positives = 50 &rArr; TP = 50 - FN = 50 - 5 = 45 &rArr; TPR = 45/50 = <strong>0.90</strong>.<br>
+          Negatives = 50 &rArr; TN = 50 - FP = 50 - 10 = 40 &rArr; TNR = 40/50 = <strong>0.80</strong> (FPR = 0.20).
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="question" id="q4">
+        <p><strong>Q4: Probabilistic Interpretation of AUC</strong><br>
+        According to Murphy PML §5.1.3.2, what is the exact probabilistic interpretation of the Area Under the ROC Curve (AUC)?</p>
+        <div class="options">
+          <button class="opt-btn" onclick="checkQ('q4', 0, false)">A) The expected accuracy when the loss is symmetric.</button>
+          <button class="opt-btn" onclick="checkQ('q4', 1, true)">B) The probability that a randomly chosen positive example is ranked higher than a randomly chosen negative example.</button>
+          <button class="opt-btn" onclick="checkQ('q4', 2, false)">C) The proportion of true positive decisions divided by false positive decisions.</button>
+        </div>
+        <div class="explanation">
+          <strong>Correct!</strong> AUC corresponds directly to the Wilcoxon-Mann-Whitney rank statistic: $\text{AUC} = P(f(x^+) > f(x^-))$. An AUC of 0.5 represents a random guess.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Synthetic dataset: [score, trueLabel]
+    const dataset = [
+      { score: 0.92, y: 1 },
+      { score: 0.85, y: 1 },
+      { score: 0.78, y: 0 },
+      { score: 0.72, y: 1 },
+      { score: 0.65, y: 1 },
+      { score: 0.55, y: 0 },
+      { score: 0.45, y: 1 },
+      { score: 0.38, y: 0 },
+      { score: 0.22, y: 0 },
+      { score: 0.10, y: 0 }
+    ];
+
+    const totalPos = dataset.filter(d => d.y === 1).length;
+    const totalNeg = dataset.filter(d => d.y === 0).length;
+
+    // Precalculate ROC Points
+    function getRocPoints() {
+      const sorted = [...dataset].sort((a, b) => b.score - a.score);
+      const points = [{ fpr: 0, tpr: 0, score: 1.01 }];
+      let tp = 0, fp = 0;
+      sorted.forEach(d => {
+        if (d.y === 1) tp++;
+        else fp++;
+        points.push({ fpr: fp / totalNeg, tpr: tp / totalPos, score: d.score });
+      });
+      return points;
+    }
+
+    const rocPoints = getRocPoints();
+
+    // Render Canvas
+    const canvas = document.getElementById('rocCanvas');
+    const ctx = canvas.getContext('2d');
+    const size = 400;
+    const pad = 45;
+
+    function toCanvas(fpr, tpr) {
+      return {
+        x: pad + fpr * (size - 2 * pad),
+        y: (size - pad) - tpr * (size - 2 * pad)
+      };
+    }
+
+    function render(currentTau) {
+      ctx.clearRect(0, 0, size, size);
+
+      // Axes
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad, pad);
+      ctx.lineTo(pad, size - pad);
+      ctx.lineTo(size - pad, size - pad);
+      ctx.stroke();
+
+      // Axis labels
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('0.0', pad - 10, size - pad + 15);
+      ctx.fillText('1.0', size - pad - 10, size - pad + 15);
+      ctx.fillText('1.0', pad - 25, pad + 5);
+      ctx.fillText('False Positive Rate (FPR)', size / 2 - 50, size - 10);
+      
+      // Diagonal Reference
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#475569';
+      ctx.beginPath();
+      const p0 = toCanvas(0, 0);
+      const p1 = toCanvas(1, 1);
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // ROC Curve
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      rocPoints.forEach((pt, i) => {
+        const c = toCanvas(pt.fpr, pt.tpr);
+        if (i === 0) ctx.moveTo(c.x, c.y);
+        else ctx.lineTo(c.x, c.y);
+      });
+      ctx.stroke();
+
+      // Compute current point
+      let tp = 0, fp = 0, fn = 0, tn = 0;
+      dataset.forEach(d => {
+        const pred = d.score >= currentTau ? 1 : 0;
+        if (d.y === 1 && pred === 1) tp++;
+        if (d.y === 0 && pred === 1) fp++;
+        if (d.y === 1 && pred === 0) fn++;
+        if (d.y === 0 && pred === 0) tn++;
+      });
+
+      const curFpr = fp / totalNeg;
+      const curTpr = tp / totalPos;
+      const curCanvas = toCanvas(curFpr, curTpr);
+
+      // Active point highlight
+      ctx.fillStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.arc(curCanvas.x, curCanvas.y, 6, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Update live readouts
+      document.getElementById('mTP').innerText = tp;
+      document.getElementById('mFP').innerText = fp;
+      document.getElementById('mFN').innerText = fn;
+      document.getElementById('mTN').innerText = tn;
+      document.getElementById('statTPR').innerText = curTpr.toFixed(2);
+      document.getElementById('statFPR').innerText = curFpr.toFixed(2);
+    }
+
+    const slider = document.getElementById('threshSlider');
+    const threshVal = document.getElementById('threshVal');
+    slider.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      threshVal.innerText = val.toFixed(2);
+      render(val);
+    });
+
+    render(0.50);
+
+    // Quiz logic
+    function checkQ(qid, optIndex, isCorrect) {
+      const q = document.getElementById(qid);
+      const exp = q.querySelector('.explanation');
+      exp.style.display = 'block';
+      if (isCorrect) {
+        exp.className = 'explanation correct';
+      } else {
+        exp.className = 'explanation wrong';
+        exp.innerHTML = '<strong>Incorrect.</strong> Try analyzing the formula definitions again or test the dynamic slider above.';
+      }
+    }
+  </script>
+</body>
+</html>
