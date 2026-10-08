@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Section 6.3: Mutual Information Review & Interactive Playground</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --heading: #f8fafc;
+      --primary: #38bdf8;
+      --accent: #818cf8;
+      --border: #334155;
+      --code-bg: #090d16;
+      --correct: #4ade80;
+      --incorrect: #f87171;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background-color: var(--bg);
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 1.2rem;
+    }
+    h1 {
+      color: var(--heading);
+      margin: 0 0 0.5rem 0;
+      font-size: 1.85rem;
+    }
+    h2 {
+      color: var(--heading);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+      margin-top: 1.5rem;
+      font-size: 1.35rem;
+    }
+    h3 {
+      color: var(--primary);
+      margin-top: 1.2rem;
+      font-size: 1.1rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.75rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+    }
+    .formula {
+      background-color: var(--code-bg);
+      padding: 0.8rem 1rem;
+      border-radius: 6px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.95rem;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+      border-left: 3px solid var(--primary);
+      color: #7dd3fc;
+    }
+    .highlight-box {
+      background-color: #172554;
+      border-left: 4px solid var(--accent);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0 6px 6px 0;
+    }
+    /* Interactive Simulator */
+    .interactive-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 1rem;
+    }
+    .slider-row input[type="range"] {
+      flex: 1;
+    }
+    .sim-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 0.2rem;
+    }
+    canvas {
+      background: #020617;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      width: 100%;
+      height: 240px;
+    }
+    /* Quiz */
+    .quiz-question {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px dashed var(--border);
+    }
+    .quiz-question:last-child {
+      border-bottom: none;
+    }
+    .options label {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0.3rem 0;
+      background: #090d16;
+      border: 1px solid transparent;
+    }
+    .options label:hover {
+      border-color: var(--accent);
+    }
+    button.submit-btn {
+      background-color: var(--primary);
+      color: #0f172a;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    button.submit-btn:hover {
+      background-color: #7dd3fc;
+    }
+    .feedback {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: none;
+    }
+    .feedback.correct {
+      color: var(--correct);
+    }
+    .feedback.incorrect {
+      color: var(--incorrect);
+    }
+    #score-banner {
+      display: none;
+      padding: 1rem;
+      background-color: #064e3b;
+      border: 1px solid var(--correct);
+      border-radius: 6px;
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #a7f3d0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Section 6.3: Mutual Information</h1>
+    <p style="color: var(--muted); margin: 0;">Focusing on 6.3.1–6.3.5, 6.3.8, and 6.3.9 (Excluding 6.3.6, 6.3.7, and 6.3.10).</p>
+  </header>
+
+  <!-- INTERACTIVE SIMULATION -->
+  <section class="card">
+    <h2>Interactive: Gaussian Correlation & Mutual Information (6.3.5)</h2>
+    <p style="color: var(--muted); font-size: 0.95rem;">
+      Adjust Pearson's correlation coefficient (&rho;) between standard bivariate Gaussians: <code>I(X; Y) = -0.5 &middot; ln(1 - &rho;&sup2;)</code> (in nats).
+    </p>
+    <div class="interactive-container">
+      <div class="slider-row">
+        <label for="rho-slider"><strong>Correlation (&rho;):</strong></label>
+        <input type="range" id="rho-slider" min="-0.99" max="0.99" step="0.01" value="0.00">
+        <span id="rho-val" style="min-width: 45px; font-weight: bold; color: var(--primary);">0.00</span>
+      </div>
+
+      <canvas id="scatterCanvas"></canvas>
+
+      <div class="sim-stats">
+        <div class="stat-item">
+          <div class="stat-label">Correlation (&rho;)</div>
+          <div class="stat-value" id="disp-rho">0.00</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">I(X; Y) [nats]</div>
+          <div class="stat-value" id="disp-mi-nats">0.00</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">I(X; Y) [bits]</div>
+          <div class="stat-value" id="disp-mi-bits">0.00</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Linear R&sup2;</div>
+          <div class="stat-value" id="disp-r2">0.00</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEARNING QUIZ -->
+  <section class="card">
+    <h2>Review Quiz</h2>
+    <form id="quiz-form">
+      <!-- Q1 -->
+      <div class="quiz-question" data-answer="b">
+        <p><strong>1. How is Mutual Information I(X; Y) fundamentally defined in terms of KL divergence?</strong></p>
+        <div class="options">
+          <label><input type="radio" name="q1" value="a"> D<sub>KL</sub>(p(x) || p(y))</label>
+          <label><input type="radio" name="q1" value="b"> D<sub>KL</sub>(p(x, y) || p(x)p(y))</label>
+          <label><input type="radio" name="q1" value="c"> D<sub>KL</sub>(p(x|y) || p(y|x))</label>
+          <label><input type="radio" name="q1" value="d"> D<sub>KL</sub>(p(x)p(y) || p(x, y))</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="quiz-question" data-answer="c">
+        <p><strong>2. If X and Y are jointly Gaussian with correlation &rho; &rarr; 1, what happens to I(X; Y)?</strong></p>
+        <div class="options">
+          <label><input type="radio" name="q2" value="a"> It approaches 1 bit</label>
+          <label><input type="radio" name="q2" value="b"> It approaches 0</label>
+          <label><input type="radio" name="q2" value="c"> It diverges to &infin;</label>
+          <label><input type="radio" name="q2" value="d"> It equals the variance &sigma;&sup2;</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="quiz-question" data-answer="a">
+        <p><strong>3. According to the Data Processing Inequality (X &rarr; Y &rarr; Z), which statement is true?</strong></p>
+        <div class="options">
+          <label><input type="radio" name="q3" value="a"> I(X; Y) &ge; I(X; Z)</label>
+          <label><input type="radio" name="q3" value="b"> I(X; Z) &ge; I(X; Y)</label>
+          <label><input type="radio" name="q3" value="c"> I(X; Y) = I(Y; Z) always</label>
+          <label><input type="radio" name="q3" value="d"> I(X; Z|Y) &gt; 0</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="quiz-question" data-answer="d">
+        <p><strong>4. Under what condition is a summary statistic s(D) of data D considered a "sufficient statistic" for parameter &theta;?</strong></p>
+        <div class="options">
+          <label><input type="radio" name="q4" value="a"> I(&theta;; s(D)) = 0</label>
+          <label><input type="radio" name="q4" value="b"> H(s(D)) = H(D)</label>
+          <label><input type="radio" name="q4" value="c"> s(D) is completely deterministic and invertible</label>
+          <label><input type="radio" name="q4" value="d"> I(&theta;; s(D)) = I(&theta;; D) (no information about &theta; is lost)</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <button type="button" class="submit-btn" onclick="gradeQuiz()">Submit Answers</button>
+      <div id="score-banner"></div>
+    </form>
+  </section>
+</div>
+
+<script>
+  // Setup interactive bivariate Gaussian canvas
+  const canvas = document.getElementById('scatterCanvas');
+  const ctx = canvas.getContext('2d');
+  const slider = document.getElementById('rho-slider');
+
+  function resizeCanvas() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = 240;
+  }
+  window.addEventListener('resize', () => { resizeCanvas(); drawScatter(parseFloat(slider.value)); });
+  resizeCanvas();
+
+  // Pseudo-random Gaussian generator (Box-Muller)
+  function gaussianRandom() {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random();
+    while(v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  }
+
+  // Pre-generate standard normal pairs
+  const N_PTS = 350;
+  const standardNormals = [];
+  for(let i=0; i<N_PTS; i++) {
+    standardNormals.push({ z1: gaussianRandom(), z2: gaussianRandom() });
+  }
+
+  function drawScatter(rho) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const scale = Math.min(canvas.width, canvas.height) / 7;
+
+    // Draw axes
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height);
+    ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy);
+    ctx.stroke();
+
+    // Draw samples
+    ctx.fillStyle = '#38bdf8';
+    for(let i=0; i<N_PTS; i++) {
+      const z1 = standardNormals[i].z1;
+      const z2 = standardNormals[i].z2;
+      const x = z1;
+      const y = rho * z1 + Math.sqrt(Math.max(0, 1 - rho * rho)) * z2;
+
+      ctx.beginPath();
+      ctx.arc(cx + x * scale, cy - y * scale, 2.5, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+  }
+
+  function updateMetrics(rho) {
+    document.getElementById('rho-val').textContent = rho.toFixed(2);
+    document.getElementById('disp-rho').textContent = rho.toFixed(2);
+    document.getElementById('disp-r2').textContent = (rho * rho).toFixed(3);
+
+    const eps = 1e-5;
+    const clampedRho = Math.min(Math.max(rho, -0.999), 0.999);
+    const miNats = -0.5 * Math.log(Math.max(eps, 1 - clampedRho * clampedRho));
+    const miBits = miNats / Math.LN2;
+
+    document.getElementById('disp-mi-nats').textContent = miNats.toFixed(3);
+    document.getElementById('disp-mi-bits').textContent = miBits.toFixed(3);
+  }
+
+  slider.addEventListener('input', (e) => {
+    const rho = parseFloat(e.target.value);
+    updateMetrics(rho);
+    drawScatter(rho);
+  });
+
+  // Init
+  updateMetrics(0.00);
+  drawScatter(0.00);
+
+  // Quiz evaluation
+  function gradeQuiz() {
+    const questions = document.querySelectorAll('.quiz-question');
+    let score = 0;
+
+    questions.forEach((q) => {
+      const selected = q.querySelector('input[type="radio"]:checked');
+      const correct = q.getAttribute('data-answer');
+      const feedback = q.querySelector('.feedback');
+      feedback.style.display = 'block';
+
+      if (selected && selected.value === correct) {
+        score++;
+        feedback.className = 'feedback correct';
+        feedback.textContent = '✓ Correct!';
+      } else {
+        feedback.className = 'feedback incorrect';
+        feedback.textContent = `✗ Incorrect. Correct answer was (${correct.toUpperCase()}).`;
+      }
+    });
+
+    const banner = document.getElementById('score-banner');
+    banner.style.display = 'block';
+    banner.textContent = `You scored ${score} out of ${questions.length}!`;
+  }
+</script>
+
+</body>
+</html>
