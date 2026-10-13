@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sections 4 & 8: Classification & Expectation-Maximization (EM)</title>
+  <!-- KaTeX for crisp mathematical typography -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ]});"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-alt: #818cf8;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 1040px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    header h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      background: linear-gradient(to right, var(--accent), var(--accent-alt));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: var(--text-muted); font-size: 1.1rem; }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover, .tab-btn.active {
+      color: #fff;
+      background: #2563eb;
+      border-color: #3b82f6;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+    .card h2 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card h3 {
+      font-size: 1.2rem;
+      color: var(--accent-alt);
+      margin: 1.25rem 0 0.5rem 0;
+    }
+
+    ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.4rem; }
+
+    .formula-box {
+      background: rgba(15, 23, 42, 0.6);
+      border-left: 4px solid var(--accent);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      overflow-x: auto;
+    }
+
+    .interactive-panel {
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      margin: 1.5rem 0;
+    }
+    canvas {
+      background: #0b1120;
+      border-radius: 6px;
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+    .sim-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+      align-items: center;
+    }
+    .btn {
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem;
+      text-align: left;
+    }
+    th { background: rgba(56, 189, 248, 0.1); color: var(--accent); }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: #334155;
+      color: #cbd5e1;
+      margin-left: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Machine Learning Core Module</h1>
+      <p>Section 4 (Linear Classification) & Section 8 (EM Algorithm & Mixture Models)</p>
+    </header>
+
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="showTab('sec4')">Sec 4: Classification</button>
+      <button class="tab-btn" onclick="showTab('sec8_theory')">Sec 8: EM Theory & Bound</button>
+      <button class="tab-btn" onclick="showTab('sec8_gmm')">Sec 8.7: GMM Walkthrough</button>
+      <button class="tab-btn" onclick="showTab('sim')">Interactive 1D GMM Simulation</button>
+      <button class="tab-btn" onclick="showTab('review')">Synthesis & Review</button>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div id="sec4" class="tab-content active">
+      <div class="card">
+        <h2>Section 4: Linear Classification & Generative Models</h2>
+        <p>In classification, our goal is to map input vectors $\mathbf{x} \in \mathbb{R}^D$ into discrete class labels $C_k \in \{C_1, \dots, C_K\}$.</p>
+        
+        <h3>1. Generative vs. Discriminative Approaches</h3>
+        <ul>
+          <li><strong>Generative Approach:</strong> Model the class-conditional densities $p(\mathbf{x}\vert{}C_k)$ and class priors $p(C_k)$. Posterior probabilities are recovered via Bayes' theorem:
+            $$p(C_k\vert{}\mathbf{x}) = \frac{p(\mathbf{x}\vert{}C_k)p(C_k)}{\sum_j p(\mathbf{x}\vert{}C_j)p(C_j)} = \sigma\left(\ln \frac{p(\mathbf{x}\vert{}C_1)p(C_1)}{p(\mathbf{x}\vert{}C_2)p(C_2)}\right) \text{ (for $K=2$)}$$
+          </li>
+          <li><strong>Discriminative Approach:</strong> Model the posterior $p(C_k\vert{}\mathbf{x})$ directly (e.g., Logistic Regression) without modeling the input distribution $p(\mathbf{x})$.</li>
+        </ul>
+
+        <h3>2. Gaussian Discriminant Analysis (GDA)</h3>
+        <p>Assuming continuous features where each class follows a multivariate normal distribution:</p>
+        <div class="formula-box">
+          $$p(\mathbf{x}\vert{}C_k) = \frac{1}{(2\pi)^{D/2}\vert{}\boldsymbol{\Sigma}_k\vert{}^{1/2}} \exp\left( -\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu}_k)^T \boldsymbol{\Sigma}_k^{-1} (\mathbf{x}-\boldsymbol{\mu}_k) \right)$$
+        </div>
+        <ul>
+          <li><strong>Tied Covariances ($\boldsymbol{\Sigma}_k = \boldsymbol{\Sigma}$):</strong> The quadratic terms in $\mathbf{x}^T \boldsymbol{\Sigma}^{-1} \mathbf{x}$ cancel in the log-odds ratio, producing a <em>linear decision boundary</em> (Linear Discriminant Analysis / LDA).</li>
+          <li><strong>Separate Covariances ($\boldsymbol{\Sigma}_k \neq \boldsymbol{\Sigma}_j$):</strong> Quadratic terms persist, resulting in quadratic decision surfaces (Quadratic Discriminant Analysis / QDA).</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SECTION 8 THEORY -->
+    <div id="sec8_theory" class="tab-content">
+      <div class="card">
+        <h2>Section 8: The Expectation-Maximization (EM) Algorithm</h2>
+        <p>EM is a general optimization paradigm for finding Maximum Likelihood (ML) or Maximum A Posteriori (MAP) estimates in models with latent variables $\mathbf{Z}$.</p>
+
+        <h3>1. The Incomplete-Data Log-Likelihood</h3>
+        <p>Given observed data $\mathbf{X}$ and latent variables $\mathbf{Z}$, our goal is to maximize:</p>
+        <div class="formula-box">
+          $$\ln p(\mathbf{X}\vert{}\boldsymbol{\theta}) = \sum_{\mathbf{Z}} \ln p(\mathbf{X}, \mathbf{Z}\vert{}\boldsymbol{\theta})$$
+        </div>
+        <p>The summation inside the logarithm prevents analytically tractability (parameters cannot decouple cleanly).</p>
+
+        <h3>2. Decomposition and Evidence Lower Bound (ELBO)</h3>
+        <p>For any arbitrary variational distribution $q(\mathbf{Z})$ over the latent variables:</p>
+        <div class="formula-box">
+          $$\ln p(\mathbf{X}\vert{}\boldsymbol{\theta}) = \mathcal{L}(q, \boldsymbol{\theta}) + \text{KL}(q \,\vert{}\vert{}\, p)$$
+          $$\mathcal{L}(q, \boldsymbol{\theta}) = \sum_{\mathbf{Z}} q(\mathbf{Z}) \ln \left\{ \frac{p(\mathbf{X}, \mathbf{Z}\vert{}\boldsymbol{\theta})}{q(\mathbf{Z})} \right\}, \quad \text{KL}(q \,\vert{}\vert{}\, p) = -\sum_{\mathbf{Z}} q(\mathbf{Z}) \ln \left\{ \frac{p(\mathbf{Z}\vert{}\mathbf{X}, \boldsymbol{\theta})}{q(\mathbf{Z})} \right\}$$
+        </div>
+        <p>Because $\text{KL}(q \,\vert{}\vert{}\, p) \ge 0$, $\mathcal{L}(q, \boldsymbol{\theta})$ forms a rigorous lower bound: $\ln p(\mathbf{X}\vert{}\boldsymbol{\theta}) \ge \mathcal{L}(q, \boldsymbol{\theta})$.</p>
+
+        <h3>3. The Generalized Two-Step Cycle</h3>
+        <ol>
+          <li><strong>E-Step (Expectation):</strong> Fix parameters $\boldsymbol{\theta}^{(\text{old})}$ and maximize $\mathcal{L}$ with respect to $q(\mathbf{Z})$. This maximum occurs when $\text{KL}(q \,\vert{}\vert{}\, p) = 0$, requiring:
+            $$q(\mathbf{Z}) = p(\mathbf{Z}\vert{}\mathbf{X}, \boldsymbol{\theta}^{(\text{old})})$$
+          </li>
+          <li><strong>M-Step (Maximization):</strong> Keep $q(\mathbf{Z})$ fixed and maximize $\mathcal{L}(q, \boldsymbol{\theta})$ with respect to $\boldsymbol{\theta}$. This is equivalent to maximizing the expected complete-data log-likelihood:
+            $$\boldsymbol{\theta}^{(\text{new})} = \arg\max_{\boldsymbol{\theta}} \mathcal{Q}(\boldsymbol{\theta}, \boldsymbol{\theta}^{(\text{old})}) \quad \text{where } \mathcal{Q}(\boldsymbol{\theta}, \boldsymbol{\theta}^{(\text{old})}) \equiv \mathbb{E}_{\mathbf{Z}\vert{}\mathbf{X},\boldsymbol{\theta}^{(\text{old})}} [\ln p(\mathbf{X}, \mathbf{Z}\vert{}\boldsymbol{\theta})]$$
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- SECTION 8 GMM -->
+    <div id="sec8_gmm" class="tab-content">
+      <div class="card">
+        <h2>Section 8.7: Gaussian Mixture Models (GMM)</h2>
+        <p>A canonical application of EM is density estimation with a mixture of $K$ Gaussians:</p>
+        <div class="formula-box">
+          $$p(\mathbf{x}) = \sum_{k=1}^K \pi_k \mathcal{N}(\mathbf{x}\vert{}\boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k), \quad \text{subject to } \sum_{k=1}^K \pi_k = 1, \; \pi_k \ge 0$$
+        </div>
+        <p>Latent binary indicators $\mathbf{z}_n \in \{0, 1\}^K$ use a 1-of-$K$ encoding indicating which Gaussian generated observation $\mathbf{x}_n$.</p>
+
+        <h3>E-Step: Evaluating Responsibilities ($\gamma_{nk}$)</h3>
+        <p>Compute the posterior probability that component $k$ generated point $\mathbf{x}_n$:</p>
+        <div class="formula-box">
+          $$\gamma_{nk} \equiv \mathbb{E}[z_{nk}] = p(z_{nk}=1\vert{}\mathbf{x}_n, \boldsymbol{\theta}) = \frac{\pi_k \mathcal{N}(\mathbf{x}_n\vert{}\boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)}{\sum_{j=1}^K \pi_j \mathcal{N}(\mathbf{x}_n\vert{}\boldsymbol{\mu}_j, \boldsymbol{\Sigma}_j)}$$
+        </div>
+
+        <h3>M-Step: Parameter Closed-Form Updates</h3>
+        <p>Define the effective number of points assigned to cluster $k$ as $N_k = \sum_{n=1}^N \gamma_{nk}$:</p>
+        <div class="formula-box">
+          $$\boldsymbol{\mu}_k^{(\text{new})} = \frac{1}{N_k}\sum_{n=1}^N \gamma_{nk}\mathbf{x}_n$$
+          $$\boldsymbol{\Sigma}_k^{(\text{new})} = \frac{1}{N_k}\sum_{n=1}^N \gamma_{nk}(\mathbf{x}_n - \boldsymbol{\mu}_k^{(\text{new})})(\mathbf{x}_n - \boldsymbol{\mu}_k^{(\text{new})})^T$$
+          $$\pi_k^{(\text{new})} = \frac{N_k}{N}$$
+        </div>
+      </div>
+    </div>
+
+    <!-- SIMULATION TAB -->
+    <div id="sim" class="tab-content">
+      <div class="card">
+        <h2>Interactive 1D GMM (EM Step-by-Step)</h2>
+        <p>Observe how responsibilities $\gamma_{nk}$ shift between two components as the algorithm updates cluster centers and widths.</p>
+        
+        <div class="interactive-panel">
+          <canvas id="emCanvas" width="800" height="300"></canvas>
+          <div class="sim-controls">
+            <button class="btn" onclick="stepEM()">Run Single EM Step</button>
+            <button class="btn" onclick="resetEM()" style="background: #94a3b8;">Reset Data & Parameters</button>
+            <span id="iterCounter" style="margin-left: 1rem; font-weight: bold; color: var(--accent);">Iteration: 0</span>
+          </div>
+        </div>
+        <p id="statDisplay" style="color: var(--text-muted); font-size: 0.95rem; text-align: center;"></p>
+      </div>
+    </div>
+
+    <!-- REVIEW / SYNTHESIS -->
+    <div id="review" class="tab-content">
+      <div class="card">
+        <h2>Synthesis & Exam Review</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Concept</th>
+              <th>Key Formula / Characteristic</th>
+              <th>Failure Modes / Gotchas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Monotonicity</strong></td>
+              <td>$\ln p(\mathbf{X}\vert{}\boldsymbol{\theta}^{(t+1)}) \ge \ln p(\mathbf{X}\vert{}\boldsymbol{\theta}^{(t)})$ guaranteed.</td>
+              <td>Guarantees convergence to a <em>local</em> maximum or saddle point, not global optimum.</td>
+            </tr>
+            <tr>
+              <td><strong>GMM vs. K-Means</strong></td>
+              <td>K-Means is the limit of EM for GMM as variances $\sigma^2 \to 0$ (hard assignments).</td>
+              <td>GMM accounts for cluster scales and covariance orientations that K-Means cannot.</td>
+            </tr>
+            <tr>
+              <td><strong>Singularities in GMM</strong></td>
+              <td>A component variance collapses to zero on a data point: $\sigma_k^2 \to 0 \implies \mathcal{N} \to \infty$.</td>
+              <td>Does not occur in discrete models; requires variance floor regularization or Bayesian priors.</td>
+            </tr>
+            <tr>
+              <td><strong>Classification Connection</strong></td>
+              <td>GDA models class-conditional distributions with known labels.</td>
+              <td>EM fits the same generative densities when class identities are unobserved (unsupervised).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Fast Self-Check Quiz</h3>
+        <ol>
+          <li><strong>Why does the log-likelihood decompose with an inequality?</strong><br/>
+          Because $\text{KL}(q\vert{}\vert{}p) \ge 0$ via Jensen's inequality, making $\mathcal{L}(q, \boldsymbol{\theta})$ a lower bound.</li>
+          <li><strong>What is the computational role of the E-step?</strong><br/>
+          It computes the expectations of the latent variables conditioned on the current parameters, decoupling the log-sum-exp problem.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'sim') drawEM();
+    }
+
+    // 1D GMM Simulation Code
+    let points = [];
+    let params = {
+      mu: [-2.5, 2.0],
+      sigma: [1.2, 1.0],
+      pi: [0.5, 0.5]
+    };
+    let iteration = 0;
+
+    function gaussianPDF(x, mu, sigma) {
+      return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+    }
+
+    function initData() {
+      points = [];
+      for (let i = 0; i < 40; i++) points.push(-2.0 + (Math.random() - 0.5) * 2.5);
+      for (let i = 0; i < 40; i++) points.push(2.5 + (Math.random() - 0.5) * 2.0);
+      params = { mu: [-1.0, 1.0], sigma: [1.8, 1.8], pi: [0.5, 0.5] };
+      iteration = 0;
+      updateUI();
+    }
+
+    function stepEM() {
+      // E-Step: Responsibilities
+      let gamma = [];
+      for (let i = 0; i < points.length; i++) {
+        let p0 = params.pi[0] * gaussianPDF(points[i], params.mu[0], params.sigma[0]);
+        let p1 = params.pi[1] * gaussianPDF(points[i], params.mu[1], params.sigma[1]);
+        let total = p0 + p1 || 1e-12;
+        gamma.push([p0 / total, p1 / total]);
+      }
+
+      // M-Step: Update parameters
+      let N = points.length;
+      for (let k = 0; k < 2; k++) {
+        let Nk = 0, sumMu = 0;
+        for (let i = 0; i < N; i++) {
+          Nk += gamma[i][k];
+          sumMu += gamma[i][k] * points[i];
+        }
+        let newMu = sumMu / Nk;
+        let sumVar = 0;
+        for (let i = 0; i < N; i++) {
+          sumVar += gamma[i][k] * Math.pow(points[i] - newMu, 2);
+        }
+        params.mu[k] = newMu;
+        params.sigma[k] = Math.max(0.3, Math.sqrt(sumVar / Nk));
+        params.pi[k] = Nk / N;
+      }
+
+      iteration++;
+      updateUI();
+      drawEM(gamma);
+    }
+
+    function resetEM() {
+      initData();
+      drawEM();
+    }
+
+    function updateUI() {
+      document.getElementById('iterCounter').innerText = `Iteration: ${iteration}`;
+      document.getElementById('statDisplay').innerText = 
+        `Cluster 1: μ=${params.mu[0].toFixed(2)}, σ=${params.sigma[0].toFixed(2)}, π=${params.pi[0].toFixed(2)} | ` +
+        `Cluster 2: μ=${params.mu[1].toFixed(2)}, σ=${params.sigma[1].toFixed(2)}, π=${params.pi[1].toFixed(2)}`;
+    }
+
+    function toCanvasX(val, w) { return (val + 6) * (w / 12); }
+    function toCanvasY(val, h) { return h - 40 - val * (h - 60); }
+
+    function drawEM(gamma) {
+      const c = document.getElementById('emCanvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, c.width, c.height);
+
+      // Baseline axis
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, c.height - 40);
+      ctx.lineTo(c.width, c.height - 40);
+      ctx.stroke();
+
+      // Plot Gaussians
+      const colors = ['#38bdf8', '#818cf8'];
+      for (let k = 0; k < 2; k++) {
+        ctx.strokeStyle = colors[k];
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        for (let px = 0; px < c.width; px += 2) {
+          let x = (px / c.width) * 12 - 6;
+          let y = params.pi[k] * gaussianPDF(x, params.mu[k], params.sigma[k]);
+          let cy = toCanvasY(y * 1.8, c.height);
+          if (px === 0) ctx.moveTo(px, cy);
+          else ctx.lineTo(px, cy);
+        }
+        ctx.stroke();
+      }
+
+      // Plot Data Points
+      for (let i = 0; i < points.length; i++) {
+        let cx = toCanvasX(points[i], c.width);
+        ctx.beginPath();
+        ctx.arc(cx, c.height - 40, 5, 0, Math.PI * 2);
+        if (gamma) {
+          ctx.fillStyle = `rgb(${Math.round(129 * gamma[i][1] + 56 * gamma[i][0])}, 
+                             ${Math.round(140 * gamma[i][1] + 189 * gamma[i][0])}, 
+                             ${Math.round(248 * gamma[i][1] + 248 * gamma[i][0])})`;
+        } else {
+          ctx.fillStyle = '#94a3b8';
+        }
+        ctx.fill();
+        ctx.strokeStyle = '#0f172a';
+        ctx.stroke();
+      }
+    }
+
+    window.addEventListener('load', () => {
+      initData();
+      drawEM();
+    });
+  </script>
+</body>
+</html>
