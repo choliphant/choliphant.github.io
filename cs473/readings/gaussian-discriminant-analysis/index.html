@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="CS473 review, Gaussian decision boundary lab, distance explorer, and learning quiz for Murphy 9.1–9.2. Excludes 9.2.3 and 9.2.6.1 onward.">
+<title>CS473 · Gaussian discriminant analysis</title>
+<style>
+
+:root{color-scheme:light;--bg:#f5f3ec;--paper:#fffef9;--ink:#172f30;--muted:#506260;--line:#d6dfd8;--accent:#176b58;--soft:#e7f0e7;--gold:#eed48b;--error:#9f342f;--error-bg:#fff0ec;--correct:#146346;--shadow:0 12px 40px #15352a08}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button,a,input,select,summary{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{cursor:default;opacity:.55}a{color:var(--accent);text-underline-offset:3px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #c27a10;outline-offset:4px}h1,h2,h3,p{margin-top:0}h1,h2,h3{line-height:1.2}h1{font-family:Georgia,serif;font-size:clamp(2.45rem,5.6vw,4.8rem);font-weight:400;letter-spacing:-.045em;max-width:850px;margin-bottom:22px}h2{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.8rem,3.3vw,2.7rem);letter-spacing:-.025em;margin-bottom:18px}h3{font-size:1.15rem;margin-bottom:13px}p{margin-bottom:16px}small,.small{font-size:.875rem}.muted{color:var(--muted)}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.76rem;font-weight:700}.wrap{max-width:1120px;margin:auto;padding:0 32px}.top{display:flex;justify-content:space-between;align-items:center;padding-top:24px;padding-bottom:24px;border-bottom:1px solid var(--line);gap:20px}.brand{font-weight:750;letter-spacing:-.02em}.brand span{font-weight:400;color:var(--muted)}.edition{font-size:.8rem;color:var(--muted)}.hero{padding-top:50px;padding-bottom:32px}.hero .eyebrow{color:var(--accent);margin-bottom:18px}.lead{font-size:1.1rem;max-width:690px;color:var(--muted)}.route{display:flex;gap:24px;flex-wrap:wrap;font-size:.85rem;margin-top:26px}.route span{display:flex;gap:9px;align-items:center}.route b{border:1px solid var(--line);border-radius:50%;width:25px;height:25px;display:inline-grid;place-items:center;font-weight:500}.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:6px}.tab{border:0;background:transparent;padding:16px 22px;color:var(--muted);font-weight:600;border-bottom:3px solid transparent}.tab[aria-selected=true]{border-bottom-color:var(--accent);color:var(--accent)}[hidden]{display:none!important}.panel{padding:34px 0 56px}.section-top{display:flex;justify-content:space-between;gap:18px;align-items:start;margin-bottom:20px}.section-top p{max-width:700px}.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:7px;padding:9px 16px;min-height:44px;font-size:.9rem;font-weight:600}.btn:hover:not(:disabled){border-color:var(--accent);background:var(--soft)}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.primary:hover:not(:disabled){background:#105441}.btn.quiet{background:transparent}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:26px;box-shadow:var(--shadow);min-width:0}.card .eyebrow{color:var(--accent);margin-bottom:12px}.wide{grid-column:1/-1}.anchor-nav{display:flex;flex-wrap:wrap;gap:8px 17px;font-size:.85rem;margin:0 0 28px}.rule{height:1px;background:var(--line);margin:32px 0}.formula{background:var(--soft);padding:15px 18px;border-radius:7px;font-family:Georgia,serif;font-size:1.08rem;line-height:1.8;overflow-wrap:anywhere;margin:15px 0}.formula small{font-family:system-ui,sans-serif;font-size:.8rem}.formula sub,.formula sup{font-size:.72em}.note{border-left:3px solid var(--accent);padding:2px 0 2px 16px;margin:18px 0}.note p:last-child{margin-bottom:0}ul,ol{padding-left:22px;margin-top:10px}li{padding-left:3px;margin-bottom:8px}.compact li{margin-bottom:5px}.source{font-size:.78rem;color:var(--muted);margin-top:18px;margin-bottom:0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{text-align:left;vertical-align:top;padding:13px 10px;border-bottom:1px solid var(--line)}th{font-weight:650;color:var(--accent)}td:first-child,th:first-child{padding-left:0}td:last-child,th:last-child{padding-right:0}.two-col{columns:2;column-gap:32px}.two-col li{break-inside:avoid}details{border-top:1px solid var(--line);padding:14px 0}details:last-child{padding-bottom:0}summary{cursor:pointer;font-weight:600}details p{margin:12px 0 0}.steps{counter-reset:step;list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.steps li{padding:0;position:relative}.steps b{display:block;margin-bottom:7px}.steps b:before{counter-increment:step;content:counter(step)" / ";color:var(--accent)}.lab-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:24px}.field{display:flex;flex-direction:column;gap:7px;margin-bottom:22px}.field label{font-size:.9rem;font-weight:600}select,input[type=number]{width:100%;border:1px solid #9bab9f;border-radius:6px;background:var(--paper);color:var(--ink);padding:10px;min-height:44px}input[type=range]{width:100%;accent-color:var(--accent)}.value-row{display:flex;justify-content:space-between;gap:15px}.value-row output{font-variant-numeric:tabular-nums}.prob-row{margin:22px 0}.prob-label{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px}.prob-label strong{font-size:1.5rem;line-height:1.3;font-weight:500;font-variant-numeric:tabular-nums}.track{height:13px;border-radius:4px;background:#e1e6dd;overflow:hidden}.fill{height:100%;background:var(--accent);transition:width .2s}.fill.alt{background:#a07b2b}.calc{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.85rem;overflow-wrap:anywhere;background:var(--bg);padding:14px;border-radius:7px;margin-top:18px}.result-label{font-size:.85rem;color:var(--muted)}.lab-insight{padding-top:18px;border-top:1px solid var(--line);margin-top:24px}.quiz-shell{max-width:820px;margin:auto}.quiz-intro{max-width:700px}.quiz-config{display:flex;gap:14px;align-items:end;flex-wrap:wrap;margin:24px 0}.quiz-config .field{margin:0;flex:1;min-width:180px}.quiz-status{display:flex;justify-content:space-between;gap:15px;align-items:center;font-size:.85rem;color:var(--muted);margin-bottom:10px}.quiz-progress{height:5px;background:var(--line);border-radius:5px;overflow:hidden;margin-bottom:28px}.quiz-progress div{height:100%;background:var(--accent);transition:width .2s}.question{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.3rem,3vw,1.7rem);line-height:1.4;margin:14px 0 22px}.options{display:grid;gap:12px}.option{display:flex;gap:13px;align-items:flex-start;min-height:54px;text-align:left;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:14px 17px;border-radius:8px;font-size:.95rem;line-height:1.5}.option .letter{display:grid;place-items:center;flex-shrink:0;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);font-size:.75rem}.option:hover:not(:disabled){border-color:var(--accent);background:var(--soft)}.option:disabled{opacity:1}.option.correct{border-color:var(--correct);background:#e8f3e9}.option.wrong{border-color:var(--error);background:var(--error-bg)}.option-state{display:block;font-weight:650;font-size:.8rem;margin-top:5px}.feedback{padding:20px;border-radius:8px;background:var(--soft);margin-top:20px}.feedback.wrong{background:var(--error-bg)}.feedback strong{display:block;margin-bottom:7px}.feedback p:last-child{margin-bottom:0}.quiz-actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:22px}.hint{font-size:.9rem;color:var(--muted);margin-top:17px;border-left:3px solid var(--gold);padding-left:14px}.score-number{font-family:Georgia,serif;font-size:3.3rem;line-height:1.1;margin:20px 0 8px}.result-actions{display:flex;gap:12px;flex-wrap:wrap;margin:23px 0}.review-item{padding:18px 0;border-top:1px solid var(--line)}.review-item p:last-child{margin-bottom:0}.tag{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.footer{border-top:1px solid var(--line);padding:24px 0 36px;font-size:.8rem;color:var(--muted)}.footer p{margin-bottom:7px}.mini-chart{display:flex;align-items:end;gap:18px;height:170px;padding-top:18px;margin:20px 0}.mini-bar-group{flex:1;height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;text-align:center;font-size:.85rem;gap:8px}.mini-bar{width:65%;max-width:100px;min-height:2px;background:var(--accent);border-radius:5px 5px 0 0}.big-number{font-family:Georgia,serif;font-size:2.4rem;line-height:1.1;margin:20px 0 8px}.checklist label{display:flex;gap:12px;align-items:start;margin:12px 0}.checklist input{margin-top:6px;accent-color:var(--accent);width:18px;height:18px;flex-shrink:0}.print-only{display:none}
+@media(max-width:760px){.wrap{padding-left:20px;padding-right:20px}.top{align-items:start}.edition{max-width:170px;text-align:right}.hero{padding-top:35px}.grid,.lab-grid{grid-template-columns:1fr}.wide{grid-column:auto}.steps{grid-template-columns:1fr}.two-col{columns:1}.section-top{display:block}.section-top .btn{margin-bottom:10px}.tab{padding:14px 16px}.card{padding:22px}.route{gap:14px}.quiz-status{align-items:start}.footer{overflow-wrap:anywhere}}
+@media(max-width:380px){.wrap{padding-left:14px;padding-right:14px}.tab{padding:14px 11px;font-size:.9rem}.card{padding:17px}.edition{font-size:.7rem}.option{padding:12px}.quiz-actions .btn{flex:1}.quiz-status{font-size:.78rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{body{background:white;color:black;font-size:10pt}.wrap{max-width:none;padding:0}.top,.hero .route,.tabs,.anchor-nav,.no-print,.footer{display:none!important}.hero{padding:0 0 15px}.hero h1{font-size:28pt}.hero .lead{font-size:11pt}.panel{padding:0}#review-panel{display:block!important}#lab-panel,#quiz-panel{display:none!important}.grid{display:block}.card{border:0;box-shadow:none;border-radius:0;padding:12px 0;break-inside:avoid}.formula{background:#f1f1ed}.print-only{display:block}.two-col{columns:1}.section-top{margin:0}.rule{margin:10px 0}details{display:none}h2{font-size:19pt}h3{font-size:13pt}a{color:black;text-decoration:none}.source{font-size:8pt}}
+
+.scope{font-size:.85rem;border-left:3px solid var(--gold);padding:6px 0 6px 15px;max-width:790px;margin-top:25px}.chart{width:100%;height:auto;display:block;touch-action:manipulation;background:#fffef9}.chart-frame{max-width:600px;margin:auto}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.85rem;margin-top:12px}.legend span{display:flex;align-items:center;gap:7px}.key{width:12px;height:12px;display:inline-block;background:#176b58}.key.b{background:#a07b2b;border-radius:50%}.matrix{font-family:ui-monospace,monospace;white-space:pre;font-size:.82rem;line-height:1.7;overflow-x:auto}.lab-detail{font-size:.85rem;margin-top:12px}.mini-label{font-size:.8rem;color:var(--muted)}.lab-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}.field-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}.checklist input{min-width:18px}.model-summary{font-size:.85rem;margin:12px 0 0}canvas:focus-visible{outline:3px solid #c27a10;outline-offset:3px}.quiz-shell:focus{outline:none}@media(max-width:760px){.lab-grid{grid-template-columns:1fr}.field-pair{grid-template-columns:1fr 1fr}}@media(max-width:380px){.field-pair{grid-template-columns:1fr}.tabs{gap:0}.tab{padding-left:9px;padding-right:9px}}
+@media(max-width:760px){.tabs{gap:0}.tab{padding:14px 8px;font-size:.9rem;white-space:nowrap;flex:1}}
+</style>
+</head>
+<body>
+<header class="wrap top"><div class="brand">CS473 <span>/ study companion</span></div><div class="edition">Murphy · Chapter 9<br>Sections 9.1–9.2</div></header>
+<main class="wrap">
+<section class="hero"><p class="eyebrow">From Gaussian clouds to class decisions</p><h1>Gaussian discriminant<br>analysis.</h1><p class="lead">Connect class probabilities, covariance geometry, and decision boundaries. Learn what changes when you share a covariance matrix, simplify it, or learn a useful distance.</p><div class="route"><span><b>1</b> Review the ideas</span><span><b>2</b> Explore the geometry</span><span><b>3</b> Test your understanding</span></div><p class="scope"><strong>Your reading scope:</strong> §9.1; §9.2 through §9.2.2; §9.2.4 including all three fitting subsections; §9.2.5; and the introduction to §9.2.6. Skip §9.2.3 and §9.2.6.1 onward.</p></section>
+<nav class="tabs" role="tablist" aria-label="Study modes"><button class="tab" id="review-tab" role="tab" aria-selected="true" aria-controls="review-panel" tabindex="0">Review</button><button class="tab" id="lab-tab" role="tab" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Geometry lab</button><button class="tab" id="quiz-tab" role="tab" aria-selected="false" aria-controls="quiz-panel" tabindex="-1">Learning quiz</button></nav>
+
+<section class="panel" id="review-panel" role="tabpanel" aria-labelledby="review-tab">
+<div class="section-top"><div><p class="eyebrow muted">The study map</p><h2>A distribution becomes a decision.</h2><p class="muted">Start with Bayes’ rule, compare QDA with LDA, then study fitting and distance. Equations use the textbook’s notation. All worked examples and questions are original practice material.</p></div><button class="btn no-print" id="print-review">Print review</button></div>
+<nav class="anchor-nav" aria-label="Review topics"><a href="#generative">The model</a><a href="#qda">QDA</a><a href="#lda">LDA</a><a href="#fitting">Fitting</a><a href="#regularization">Covariance choices</a><a href="#centroid">Nearest centroid</a><a href="#fisher">Fisher’s LDA</a></nav>
+<div class="grid">
+<article class="card wide" id="generative"><p class="eyebrow">9.1 &amp; 9.2 · Introduction and Gaussian discriminant analysis</p><h3>Model each class, then apply Bayes’ rule.</h3><p>A <strong>generative classifier</strong> models the class prior π<sub>c</sub> = p(y = c) and the class-conditional feature density p(x | y = c). Together they define the joint distribution. You could generate an example by sampling a class and then sampling its features.</p><div class="formula">p(y = c | x, θ) = π<sub>c</sub> p(x | y = c, θ) / ∑<sub>k</sub> π<sub>k</sub> p(x | y = k, θ)<br>p(x | y = c, θ) = 𝒩(x | μ<sub>c</sub>, Σ<sub>c</sub>)<br><small>Eqs. 9.1–9.3 · GDA chooses a multivariate Gaussian density for every class.</small></div><p>A discriminative classifier instead models p(y | x) directly. GDA is generative even though “discriminant” appears in its name. Here, <strong>LDA means linear discriminant analysis</strong>.</p><div class="note"><p><strong>Score versus probability.</strong> The product π<sub>c</sub>𝒩(x | μ<sub>c</sub>, Σ<sub>c</sub>) is an unnormalized score. Divide by the sum over classes to obtain posterior probabilities. Under equal misclassification costs, the MAP class is the one with the largest score; normalization is unnecessary for that argmax.</p></div><p><strong>Worked example:</strong> π<sub>A</sub> = 0.25 and π<sub>B</sub> = 0.75. At a particular x, the class densities are 0.6 and 0.1. The scores are 0.15 and 0.075, so p(A | x) = 0.15/0.225 = 2/3. A less common class can win when its likelihood is sufficiently larger.</p><p class="small muted">A Gaussian density value is not the probability of one exact continuous input; density values can exceed 1. Class posterior probabilities still lie between 0 and 1.</p><p class="source">Textbook p. 323 · §§9.1–9.2</p></article>
+
+<article class="card" id="qda"><p class="eyebrow">9.2.1 · Quadratic decision boundaries</p><h3>Different covariances preserve quadratic terms.</h3><div class="formula">g<sub>c</sub>(x) = log π<sub>c</sub> − ½ log |Σ<sub>c</sub>|<br>− ½(x − μ<sub>c</sub>)<sup>T</sup>Σ<sub>c</sub><sup>−1</sup>(x − μ<sub>c</sub>)<br><small>Eq. 9.4, omitting the common −(D/2)log(2π) term.</small></div><p>The last term is a squared <strong>Mahalanobis distance</strong>. It measures distance relative to the class’s spread and correlations. The log determinant term accounts for the Gaussian’s volume; spread alone does not make a class more likely everywhere.</p><p>For two classes, set g<sub>c</sub>(x) = g<sub>k</sub>(x). With separate covariance matrices, the quadratic terms generally remain. This is <strong>quadratic discriminant analysis (QDA)</strong>.</p><p class="note">QDA permits quadratic boundaries; special parameter settings can still give a linear boundary. Unequal diagonal covariances can also produce quadratic boundaries.</p><p class="source">Textbook p. 324 · §9.2.1</p></article>
+
+<article class="card" id="lda"><p class="eyebrow">9.2.2 · Linear decision boundaries</p><h3>Shared covariance cancels the common quadratic term.</h3><p>Constrain every class to use the <em>same entire matrix</em>: Σ<sub>c</sub> = Σ. The determinant term and x<sup>T</sup>Σ<sup>−1</sup>x are identical across classes, so they cancel when comparing scores.</p><div class="formula">g<sub>c</sub>(x) = γ<sub>c</sub> + x<sup>T</sup>β<sub>c</sub><br>β<sub>c</sub> = Σ<sup>−1</sup>μ<sub>c</sub><br>γ<sub>c</sub> = log π<sub>c</sub> − ½μ<sub>c</sub><sup>T</sup>Σ<sup>−1</sup>μ<sub>c</sub><br><small>Eqs. 9.5–9.7 · Class-independent terms omitted.</small></div><p>The pairwise equality is a hyperplane, so this is <strong>linear discriminant analysis (LDA)</strong>. In 2D it is a line. Shared covariance can be full and correlated; it need not be diagonal or spherical.</p><p class="note">“Linear” refers to the class comparison and boundary. Normalized class posterior probabilities need not be linear functions of x.</p><p class="source">Textbook p. 325 · §9.2.2 only</p></article>
+
+<article class="card wide" id="fitting"><p class="eyebrow">9.2.4 · Model fitting</p><h3>Use labeled data to fit each class.</h3><p>The labeled joint log-likelihood separates into a class-prior term and Gaussian terms grouped by class. This lets you optimize π separately from the Gaussian parameters. Let N be the total number of examples and N<sub>c</sub> the count in class c.</p><div class="formula">ℓ(θ) = ∑<sub>n</sub> log π<sub>yₙ</sub> + ∑<sub>c</sub> ∑<sub>n:yₙ=c</sub> log 𝒩(x<sub>n</sub> | μ<sub>c</sub>, Σ<sub>c</sub>)<br>π̂<sub>c</sub> = N<sub>c</sub>/N<br>μ̂<sub>c</sub> = (1/N<sub>c</sub>) ∑<sub>n:yₙ=c</sub> x<sub>n</sub><br>Σ̂<sub>c</sub> = (1/N<sub>c</sub>) ∑<sub>n:yₙ=c</sub> (x<sub>n</sub> − μ̂<sub>c</sub>)(x<sub>n</sub> − μ̂<sub>c</sub>)<sup>T</sup><br><small>Eqs. 9.18–9.20 · Gaussian maximum likelihood estimates.</small></div><p><strong>Worked example, one feature:</strong> class A has values [0, 2] and class B has [3, 3, 5, 5]. Then π̂<sub>A</sub> = 1/3, π̂<sub>B</sub> = 2/3, μ̂<sub>A</sub> = 1, μ̂<sub>B</sub> = 4, and both MLE variances are 1. The class means differ, but each class has the same within-class spread.</p><div class="note"><p><strong>Keep the denominator straight.</strong> The class covariance MLE divides by N<sub>c</sub>, not N<sub>c</sub> − 1. In D dimensions, its rank is at most min(D, N<sub>c</sub> − 1). If there are too few examples, it can be singular and unusable in a Gaussian inverse/determinant calculation.</p></div><p class="source">Textbook pp. 326–327 · §9.2.4, beginning at Eq. 9.17</p></article>
+
+<article class="card wide" id="regularization"><p class="eyebrow">9.2.4.1–9.2.4.3 · Covariance choices</p><h3>Reduce what you need to estimate.</h3><div class="table-wrap"><table><thead><tr><th>Choice</th><th>Covariance parameters</th><th>Geometry and tradeoff</th></tr></thead><tbody><tr><td>Separate full matrices</td><td>C × D(D + 1)/2</td><td>QDA; each class has its own spread and correlations. Needs more data.</td></tr><tr><td>One shared full matrix</td><td>D(D + 1)/2</td><td>LDA; pool information across classes while retaining shared correlations.</td></tr><tr><td>Separate diagonal matrices</td><td>C × D</td><td>Discard within-class feature correlations; boundaries can remain quadratic.</td></tr><tr><td>One shared diagonal matrix</td><td>D</td><td>Diagonal LDA; linear boundaries with fewer parameters.</td></tr></tbody></table></div><p class="small muted">Counts above are for covariance parameters only. Every model also estimates C × D mean coordinates and C − 1 free class-prior parameters.</p><h3>Tied covariance: pool residuals around the class means.</h3><div class="formula">Σ̂ = (1/N) ∑<sub>c</sub> ∑<sub>n:yₙ=c</sub> (x<sub>n</sub> − μ̂<sub>c</sub>)(x<sub>n</sub> − μ̂<sub>c</sub>)<sup>T</sup><br>= ∑<sub>c</sub> (N<sub>c</sub>/N) Σ̂<sub>c</sub><br><small>Eq. 9.21 · The tied covariance MLE divides by N.</small></div><p>This is a count-weighted average of class covariance MLEs. It is <strong>not</strong> the covariance of all inputs around one global mean: between-class mean differences should not inflate the within-class spread.</p><h3>Diagonal covariance: fewer parameters, fewer correlations.</h3><p>A diagonal Gaussian covariance makes features conditionally independent within a class. This can help in high dimensions, but discards correlations and does not guarantee immunity to overfitting. Even a tied estimate can be singular when data are insufficient.</p><h3>MAP estimation: shrink correlations toward zero.</h3><div class="formula">Σ̂<sub>map</sub> = λ diag(Σ̂<sub>mle</sub>) + (1 − λ)Σ̂<sub>mle</sub>, &nbsp;0 ≤ λ ≤ 1<br><small>Eq. 9.22 · The covariance shrinkage form presented in this section.</small></div><p>Here diag(Σ̂) is a matrix retaining only the diagonal. The variances stay unchanged; each off-diagonal covariance is multiplied by (1 − λ). λ = 0 keeps the full estimate, λ = 1 makes it diagonal. This is <strong>regularized discriminant analysis (RDA)</strong>.</p><p><strong>Example:</strong> if Σ̂ = [[4, 1.2], [1.2, 1]], then λ = 0.5 gives [[4, 0.6], [0.6, 1]]. This shrinkage targets a diagonal matrix, rather than replacing the variances by equal values. Zero diagonal variance can still require additional treatment.</p><p class="source">Textbook p. 327 · §§9.2.4.1–9.2.4.3</p></article>
+
+<article class="card wide" id="centroid"><p class="eyebrow">9.2.5 · Nearest centroid classifier</p><h3>Equal priors plus shared covariance give nearest class means.</h3><p>With a common covariance and uniform class priors, the only class-dependent part of the Gaussian score is the negative squared Mahalanobis distance:</p><div class="formula">ŷ(x) = argmin<sub>c</sub> (x − μ<sub>c</sub>)<sup>T</sup>Σ<sup>−1</sup>(x − μ<sub>c</sub>)<br><small>Eq. 9.23 · Nearest centroid / nearest class mean (NCM).</small></div><p>If Σ = σ²I, minimizing this distance is equivalent to minimizing ordinary Euclidean distance. Otherwise, directions with more variance count less, and correlations affect the metric. Unequal priors add a class preference; unequal covariances add class-specific volume and shape terms.</p><p><strong>Worked example:</strong> x = (0, 0), μ<sub>A</sub> = (2, 0), μ<sub>B</sub> = (0, 1), and shared Σ = diag(9, 1). Euclidean squared distances are 4 and 1, so Euclidean NCM chooses B. Mahalanobis squared distances are 4/9 and 1, so the Gaussian NCM chooses A.</p><h3>A useful distance can be learned.</h3><p>Choose a linear transform T and define d²(x, μ<sub>c</sub>) = ‖T(x − μ<sub>c</sub>)‖². This corresponds to the positive semidefinite metric T<sup>T</sup>T. The probabilities can be formed by normalizing exp(−d²/2) across classes. The transform can be trained using a discriminative loss.</p><p class="small muted">T is used here to make dimensions explicit: T maps input features into a transformed space. It represents the learned distance idea in Eqs. 9.24–9.26.</p><p class="note"><strong>One-shot learning:</strong> with a useful transform already learned, add a class from a single labeled prototype μ<sub>c</sub>. This depends on the quality of the learned metric; a single prototype is not enough to learn a full class covariance.</p><p class="source">Textbook p. 328 · §9.2.5</p></article>
+
+<article class="card" id="fisher"><p class="eyebrow">9.2.6 · Introductory discussion only</p><h3>Project first, then classify.</h3><p>High-dimensional Gaussian fitting can be difficult. Project x ∈ ℝ<sup>D</sup> into z = Wx ∈ ℝ<sup>K</sup>, with K much smaller than D, and fit Gaussian class models in that smaller space. W has shape K × D.</p><p><strong>PCA</strong> chooses a projection without using class labels. A direction with large overall variation may mix classes. <strong>Fisher’s LDA (FLDA)</strong> uses class information to find a projection useful for Gaussian classification.</p><p>The introduction describes FLDA as a hybrid of discriminative and generative ideas. It gives the limit <strong>K ≤ C − 1</strong>: two classes allow at most one FLDA dimension. The reason and derivation belong to the skipped material.</p><p class="source">Textbook p. 328 · §9.2.6 introductory text; stop before §9.2.6.1</p></article>
+
+<article class="card"><p class="eyebrow">Common traps</p><h3>Check the assumption behind the shortcut.</h3><ul class="compact"><li><strong>Diagonal ≠ shared.</strong> Diagonal removes correlations; tying shares a matrix across classes.</li><li><strong>LDA can model correlations.</strong> Its shared covariance can be full.</li><li><strong>Nearest Euclidean mean is a special case.</strong> Use equal priors and shared spherical covariance.</li><li><strong>Density ≠ posterior.</strong> Include priors and normalize if probabilities are requested.</li><li><strong>Pooling ≠ global covariance.</strong> Center residuals at each class mean.</li><li><strong>PCA ≠ class separation.</strong> Its objective ignores the labels.</li></ul><details><summary>Explain LDA’s cancellation in one sentence.</summary><p>With a shared covariance matrix, the x-quadratic term and log determinant are common to all classes, leaving affine class scores after they are dropped.</p></details><details><summary>Why prefer LDA with limited data?</summary><p>It estimates a single covariance from pooled within-class residuals rather than estimating a separate matrix for each class. This reduces variance in estimation, at the cost of assuming a common covariance.</p></details></article>
+
+<article class="card wide"><p class="eyebrow">Before you take the quiz</p><h3>Can you do these without looking?</h3><div class="checklist two-col"><label><input type="checkbox"> <span>Convert priors and Gaussian likelihoods into a posterior.</span></label><label><input type="checkbox"> <span>Explain which quadratic terms cancel in LDA.</span></label><label><input type="checkbox"> <span>Compute class means and MLE covariances.</span></label><label><input type="checkbox"> <span>Pool covariances with count weights.</span></label><label><input type="checkbox"> <span>Distinguish tying, diagonalization, and shrinkage.</span></label><label><input type="checkbox"> <span>State the conditions for a nearest centroid rule.</span></label><label><input type="checkbox"> <span>Explain how feature variance changes distance.</span></label><label><input type="checkbox"> <span>Compare PCA and FLDA conceptually.</span></label></div></article>
+</div>
+</section>
+
+<section class="panel" id="lab-panel" role="tabpanel" aria-labelledby="lab-tab" hidden>
+<div class="section-top"><div><p class="eyebrow muted">Geometry lab · experiment 1</p><h2>Watch the boundary change.</h2><p class="muted">Switch between shared and separate covariance matrices. Move the test point and change the class prior to see how the Gaussian scores become probabilities.</p></div></div>
+<div class="lab-grid">
+<div class="card"><div class="field"><label for="boundary-model">Covariance model</label><select id="boundary-model"><option value="shared">LDA · shared full covariance</option><option value="separate">QDA · separate full covariances</option><option value="diagonal">QDA · separate diagonal covariances</option></select></div><div class="field"><div class="value-row"><label for="class-prior">Class A prior</label><output id="prior-output" for="class-prior">0.50</output></div><input id="class-prior" type="range" min="5" max="95" value="50" step="5"></div><div class="field"><div class="value-row"><label for="shrink">Diagonal shrinkage λ</label><output id="shrink-output" for="shrink">0.00</output></div><input id="shrink" type="range" min="0" max="100" value="0" step="5"><span class="mini-label" id="shrink-help">Moves off-diagonal covariances toward zero; variances stay fixed.</span></div><div class="field-pair"><div class="field"><label for="point-x">Test point x₁</label><input id="point-x" type="range" min="-4" max="4" step="0.1" value="0"><output id="point-x-output" for="point-x">0.0</output></div><div class="field"><label for="point-y">Test point x₂</label><input id="point-y" type="range" min="-4" max="4" step="0.1" value="0"><output id="point-y-output" for="point-y">0.0</output></div></div><button class="btn quiet" id="reset-boundary">Reset experiment</button><p class="matrix" id="model-matrices"></p><p class="small muted">Means are fixed: μA = (−1.2, 0), μB = (1.2, 0.7). These are illustrative model parameters, not estimates fitted from plotted samples.</p></div>
+<div class="card"><div class="chart-frame"><canvas class="chart" id="boundary-canvas" width="600" height="530" role="img" aria-label="Gaussian decision regions with covariance ellipses, class means, and a movable test point. Numeric predictions appear below.">Use the controls to compare LDA and QDA. Predictions are also shown as text below.</canvas></div><div class="legend"><span><i class="key" aria-hidden="true"></i>A · square mean</span><span><i class="key b" aria-hidden="true"></i>B · circle mean</span><span>× Test point</span></div><p class="small muted">Tint = predicted class. Dashed line = equal scores. Ellipses = squared Mahalanobis distance 1 and 4 from each mean.</p><div class="prob-row"><div class="prob-label"><span>p(A | x)</span><strong id="posterior-a">—</strong></div><div class="track"><div class="fill" id="posterior-a-fill"></div></div></div><div class="prob-row"><div class="prob-label"><span>p(B | x)</span><strong id="posterior-b">—</strong></div><div class="track"><div class="fill alt" id="posterior-b-fill"></div></div></div><div id="prediction-detail" class="lab-detail" role="status" aria-live="polite"></div><div class="calc" id="gaussian-scores"></div><p class="lab-insight small" id="boundary-insight"></p></div>
+</div>
+<div class="rule"></div>
+<p class="eyebrow muted">Geometry lab · experiment 2</p><h2>Which mean is actually nearer?</h2><p class="muted">Keep x = (0, 0), μA = (2, 0), μB = (0, 1), and equal priors. Adjust the shared variance along x₁. Euclidean distance stays fixed while Mahalanobis distance changes.</p>
+<div class="lab-grid"><div class="card"><div class="field"><div class="value-row"><label for="distance-var">Shared variance σ₁²</label><output id="distance-var-output" for="distance-var">9.0</output></div><input id="distance-var" type="range" min="1" max="12" value="9" step="0.5"></div><div class="formula">Σ = diag(σ₁², 1)<br>d²<sub>A</sub> = 4/σ₁²<br>d²<sub>B</sub> = 1</div><p class="small muted">A larger variance means a fixed displacement is less unusual. All matrices here are positive definite. At σ₁² = 4, both classes have the same distance and posterior.</p></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Metric</th><th>d²A</th><th>d²B</th><th>Nearest</th></tr></thead><tbody><tr><td>Euclidean</td><td>4.000</td><td>1.000</td><td>B</td></tr><tr><td>Mahalanobis</td><td id="distance-a"></td><td>1.000</td><td id="distance-winner"></td></tr></tbody></table></div><div class="formula" id="distance-posterior" role="status" aria-live="polite"></div><p id="distance-insight" class="small"></p><p class="source">For equal priors and a shared covariance, p(c | x) ∝ exp(−d²c/2). The common determinant cancels.</p></div></div>
+</section>
+
+<section class="panel" id="quiz-panel" role="tabpanel" aria-labelledby="quiz-tab" hidden><div class="quiz-shell">
+<div id="quiz-start"><p class="eyebrow muted">Learning quiz</p><h2>Practice, explain, repeat.</h2><p class="quiz-intro muted">Twenty-four questions cover concepts, calculations, and model choices. Each answer reveals an explanation and a textbook reference. Hints are available before answering.</p><div class="card"><h3>Set your focus</h3><div class="quiz-config"><div class="field"><label for="quiz-focus">Question set</label><select id="quiz-focus"><option value="all">All assigned material · 24 questions</option><option value="foundation">Model &amp; boundaries · 8 questions</option><option value="fitting">Fitting &amp; covariance · 9 questions</option><option value="geometry">Centroids &amp; projections · 7 questions</option></select></div><button class="btn primary" id="start-quiz">Start learning quiz</button></div><p class="small muted">First answers determine your score. Explanations stay available in the final review, and missed questions can be retried. Progress lasts for this open page session.</p></div><div class="note"><p class="small">Suggested routine: read the review, experiment in the lab, then answer without looking back. A missed question is a cue for what to study next.</p></div></div>
+<div id="quiz-active" hidden><div class="quiz-status"><span id="question-count"></span><span id="quiz-score"></span></div><div class="quiz-progress" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="24" aria-valuenow="0" id="question-progress"><div id="question-progress-fill"></div></div><div class="card"><span class="tag" id="question-section"></span><h2 class="question" id="question-text" tabindex="-1"></h2><div class="options" id="question-options" role="group" aria-labelledby="question-text"></div><div class="hint" id="question-hint" hidden></div><div class="feedback" id="question-feedback" role="status" aria-live="polite" hidden></div><div class="quiz-actions"><button class="btn quiet" id="show-hint">Show hint</button><button class="btn primary" id="next-question" disabled>Next question →</button></div></div></div>
+<div id="quiz-results" hidden aria-live="polite"></div>
+</div></section>
+</main>
+<footer class="wrap"><div class="footer"><p><strong>Source:</strong> Kevin P. Murphy, <cite>Probabilistic Machine Learning: An Introduction</cite>, online version April 18, 2025, §§9.1–9.2, printed pp. 323–328 (PDF pp. 353–358), with the stated skips.</p><p>Original study notes, examples, and practice questions based on your local textbook. Works offline; no external libraries or services. Quiz progress lasts for this open page session.</p></div></footer>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const tabs = [...document.querySelectorAll('[role="tab"]')];
+function selectTab(tab) { tabs.forEach(t => { const selected = t === tab; t.setAttribute('aria-selected', String(selected)); t.tabIndex = selected ? 0 : -1; $(t.getAttribute('aria-controls')).hidden = !selected; }); if(tab.id==='lab-tab') drawBoundary(); }
+tabs.forEach((tab,index) => { tab.addEventListener('click', () => selectTab(tab)); tab.addEventListener('keydown', e => { let next; if(e.key==='ArrowRight') next=(index+1)%tabs.length; if(e.key==='ArrowLeft') next=(index+tabs.length-1)%tabs.length; if(e.key==='Home') next=0; if(e.key==='End') next=tabs.length-1; if(next!==undefined){e.preventDefault();selectTab(tabs[next]);tabs[next].focus();} }); });
+$('print-review').addEventListener('click', () => window.print());
+const means=[[-1.2,0],[1.2,.7]],colors=['#176b58','#a07b2b'];
+function covarianceModel(){
+ const model=$('boundary-model').value,lambda=Number($('shrink').value)/100;
+ let matrices=model==='shared'?[[1.4,.6,1],[1.4,.6,1]]:model==='separate'?[[.65,.4,1.5],[1.7,-.45,.55]]:[[.65,0,1.5],[1.7,0,.55]];
+ return matrices.map(([a,b,d])=>[a,b*(1-lambda),d]);
+}
+function gaussianScore(x,mu,matrix,prior){
+ const [a,b,d]=matrix,det=a*d-b*b,dx=x[0]-mu[0],dy=x[1]-mu[1];
+ const distance=(d*dx*dx-2*b*dx*dy+a*dy*dy)/det;
+ return Math.log(prior)-.5*Math.log(det)-.5*distance;
+}
+function classScores(x,matrices,prior){return means.map((mu,c)=>gaussianScore(x,mu,matrices[c],c===0?prior:1-prior));}
+function normalized(scores){const m=Math.max(...scores),v=scores.map(s=>Math.exp(s-m)),sum=v[0]+v[1];return v.map(a=>a/sum);}
+function drawBoundary(){
+ const canvas=$('boundary-canvas'),ctx=canvas.getContext('2d'),matrices=covarianceModel(),prior=Number($('class-prior').value)/100;
+ const labelScale=Math.max(1,600/(canvas.clientWidth||600)),left=65,top=28,size=450,sx=x=>left+(x+4)*size/8,sy=y=>top+(4-y)*size/8;
+ ctx.clearRect(0,0,600,530);ctx.fillStyle='#fffef9';ctx.fillRect(0,0,600,530);
+ const step=4;
+ for(let py=0;py<size;py+=step) for(let px=0;px<size;px+=step){
+  const x=[-4+(px+step/2)*8/size,4-(py+step/2)*8/size],s=classScores(x,matrices,prior);
+  ctx.fillStyle=s[0]>=s[1]?'#e2eee7':'#f4ead2';ctx.fillRect(left+px,top+py,step,step);
+ }
+ ctx.save();ctx.beginPath();ctx.rect(left,top,size,size);ctx.clip();
+ ctx.strokeStyle='#172f3018';ctx.lineWidth=1;
+ for(let t=-4;t<=4;t++){ctx.beginPath();ctx.moveTo(sx(t),top);ctx.lineTo(sx(t),top+size);ctx.stroke();ctx.beginPath();ctx.moveTo(left,sy(t));ctx.lineTo(left+size,sy(t));ctx.stroke();}
+ // Marching squares: interpolate the zero of the class-score difference.
+ ctx.strokeStyle='#304b48';ctx.lineWidth=1.7;ctx.setLineDash([5,4]);ctx.beginPath();
+ const delta=(x,y)=>{const s=classScores([x,y],matrices,prior);return s[0]-s[1];};
+ for(let iy=0;iy<80;iy++)for(let ix=0;ix<80;ix++){
+  const x=-4+ix*.1,y=-4+iy*.1,corners=[[x,y],[x+.1,y],[x+.1,y+.1],[x,y+.1]],v=corners.map(p=>delta(...p)),hits=[];
+  for(let k=0;k<4;k++){const j=(k+1)%4;if((v[k]>=0)!==(v[j]>=0)){const t=v[k]/(v[k]-v[j]);hits.push([corners[k][0]+t*(corners[j][0]-corners[k][0]),corners[k][1]+t*(corners[j][1]-corners[k][1])]);}}
+  for(let j=0;j+1<hits.length;j+=2){ctx.moveTo(sx(hits[j][0]),sy(hits[j][1]));ctx.lineTo(sx(hits[j+1][0]),sy(hits[j+1][1]));}
+ }
+ ctx.stroke();ctx.setLineDash([]);
+ matrices.forEach((m,c)=>{
+  const [a,b,d]=m,l11=Math.sqrt(a),l21=b/l11,l22=Math.sqrt(d-l21*l21),mu=means[c];
+  ctx.strokeStyle=colors[c];ctx.lineWidth=1.5;
+  for(const radius of [1,2]){ctx.beginPath();for(let k=0;k<=120;k++){const theta=2*Math.PI*k/120,u=radius*Math.cos(theta),v=radius*Math.sin(theta),x=sx(mu[0]+l11*u),y=sy(mu[1]+l21*u+l22*v);if(k===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();}
+  ctx.fillStyle=colors[c];const mx=sx(mu[0]),my=sy(mu[1]);ctx.beginPath();if(c===0)ctx.rect(mx-5,my-5,10,10);else ctx.arc(mx,my,6,0,2*Math.PI);ctx.fill();ctx.font='bold '+Math.max(15,12*labelScale)+'px system-ui';ctx.fillText(c===0?'A':'B',mx+10,my-9);
+ });
+ const point=[Number($('point-x').value),Number($('point-y').value)],px=sx(point[0]),py=sy(point[1]);ctx.strokeStyle='#172f30';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px-7,py-7);ctx.lineTo(px+7,py+7);ctx.moveTo(px-7,py+7);ctx.lineTo(px+7,py-7);ctx.stroke();
+ ctx.restore();ctx.strokeStyle='#899b92';ctx.lineWidth=1;ctx.strokeRect(left,top,size,size);ctx.fillStyle='#506260';ctx.font=Math.max(14,12*labelScale)+'px system-ui';ctx.textAlign='center';
+ for(let t=-4;t<=4;t+=2){ctx.fillText(String(t),sx(t),top+size+22);ctx.fillText(String(t),left-20,sy(t)+5);}ctx.fillText('x₁',left+size/2,top+size+45);ctx.save();ctx.translate(16,top+size/2);ctx.rotate(-Math.PI/2);ctx.fillText('x₂',0,0);ctx.restore();
+}
+function updateBoundary(){
+ const prior=Number($('class-prior').value)/100,lambda=Number($('shrink').value)/100,model=$('boundary-model').value,matrices=covarianceModel(),point=[Number($('point-x').value),Number($('point-y').value)],scores=classScores(point,matrices,prior),p=normalized(scores);
+ $('prior-output').textContent=prior.toFixed(2);$('shrink-output').textContent=lambda.toFixed(2);$('point-x-output').textContent=point[0].toFixed(1);$('point-y-output').textContent=point[1].toFixed(1);
+ $('shrink').disabled=model==='diagonal';$('shrink-help').textContent=model==='diagonal'?'Already diagonal: shrinkage leaves these matrices unchanged.':'Moves off-diagonal covariances toward zero; variances stay fixed.';
+ $('model-matrices').textContent=matrices.map((m,c)=>'Σ'+(c===0?'A':'B')+' = [['+m[0].toFixed(2)+', '+m[1].toFixed(2)+'],\n      ['+m[1].toFixed(2)+', '+m[2].toFixed(2)+']]').join('\n');
+ ['a','b'].forEach((id,c)=>{$('posterior-'+id).textContent=(100*p[c]).toFixed(1)+'%';$('posterior-'+id+'-fill').style.width=(100*p[c])+'%';});
+ $('prediction-detail').textContent='At x = ('+point.map(v=>v.toFixed(1)).join(', ')+'), '+(Math.abs(p[0]-.5)<1e-9?'both classes tie.':'predict class '+(p[0]>.5?'A':'B')+'.');
+ $('gaussian-scores').textContent='gA = '+scores[0].toFixed(4)+'; gB = '+scores[1].toFixed(4)+'. Log scores omit the common −log(2π) term. Subtract the maximum before exponentiating to normalize stably.';
+ $('boundary-insight').textContent=model==='shared'?'Shared covariance: shrinkage can rotate the line, and the prior shifts it. The class boundary remains linear.':'Separate covariances: class-specific quadratic and volume terms generally remain. Even diagonal covariances need not produce a straight boundary.';
+ drawBoundary();
+}
+['boundary-model','class-prior','shrink','point-x','point-y'].forEach(id=>$(id).addEventListener('input',updateBoundary));
+$('reset-boundary').addEventListener('click',()=>{$('boundary-model').value='shared';$('class-prior').value='50';$('shrink').value='0';$('point-x').value='0';$('point-y').value='0';updateBoundary();});
+function updateDistance(){
+ const variance=Number($('distance-var').value),da=4/variance,p=normalized([-.5*da,-.5]);
+ $('distance-var-output').textContent=variance.toFixed(1);$('distance-a').textContent=da.toFixed(3);$('distance-winner').textContent=Math.abs(da-1)<1e-9?'Tie':da<1?'A':'B';
+ $('distance-posterior').textContent='p(A | x) = '+p[0].toFixed(4)+'; p(B | x) = '+p[1].toFixed(4);
+ $('distance-insight').textContent=variance>4?'Mahalanobis chooses A despite its larger Euclidean distance: two units along a high-variance direction are less unusual.':variance===4?'At variance 4, the standardized squared distances are equal. Equal priors then give 0.5 probability to each class.':'Both metrics choose B here. The variance along x₁ is too small to make A’s displacement less costly than B’s.';
+}
+$('distance-var').addEventListener('input',updateDistance);updateBoundary();updateDistance();
+window.addEventListener('resize',()=>{if(!$('lab-panel').hidden)drawBoundary();});
+const questions=[
+ {
+  "group": "foundation",
+  "section": "9.1",
+  "topic": "Generative classification",
+  "page": "323",
+  "q": "What makes GDA a generative classifier?",
+  "a": [
+   "It generates labels without modeling features.",
+   "It models the class prior and a feature distribution for each class, defining p(x,y).",
+   "It directly fits only the class posterior p(y | x).",
+   "It always uses a straight decision boundary."
+  ],
+  "correct": 1,
+  "hint": "Consider which distributions let you sample both a label and an input.",
+  "why": "GDA models p(y=c)=πc and p(x | y=c). Their product defines the joint distribution, so you can sample a class and then sample its features. A linear boundary is an additional covariance restriction, not what makes the model generative."
+ },
+ {
+  "group": "foundation",
+  "section": "9.2",
+  "topic": "Posterior normalization",
+  "page": "323",
+  "q": "Class priors are πA=0.25 and πB=0.75. At x, the Gaussian densities are 0.6 and 0.1. What is p(A | x)?",
+  "a": [
+   "0.25.",
+   "0.6.",
+   "2/3.",
+   "0.15."
+  ],
+  "correct": 2,
+  "hint": "Multiply by each prior, then divide A’s score by the sum.",
+  "why": "The unnormalized scores are 0.25×0.6=0.15 and 0.75×0.1=0.075. Thus p(A | x)=0.15/(0.15+0.075)=2/3. Density alone is not the class posterior."
+ },
+ {
+  "group": "foundation",
+  "section": "9.2",
+  "topic": "Scores versus probabilities",
+  "page": "323",
+  "q": "Why can the posterior denominator be omitted when choosing the MAP class under equal error costs?",
+  "a": [
+   "Class priors never affect the prediction.",
+   "Every class has the same likelihood.",
+   "All Gaussian density values are between 0 and 1.",
+   "The denominator is positive and identical for every candidate class at the given x."
+  ],
+  "correct": 3,
+  "hint": "Compare the same denominator across candidate labels.",
+  "why": "For a fixed x, all class scores are divided by the same positive marginal density p(x). That scaling leaves their ordering unchanged. You still need normalization if you want posterior probabilities."
+ },
+ {
+  "group": "foundation",
+  "section": "9.2.1",
+  "topic": "Gaussian discriminant",
+  "page": "324",
+  "q": "Which terms belong in a QDA discriminant score, after dropping the common −(D/2)log(2π) term?",
+  "a": [
+   "Only log πc and the covariance determinant.",
+   "The class posterior multiplied by the squared distance.",
+   "Only the Euclidean distance to the mean.",
+   "log πc − ½ log|Σc| − ½(x−μc)ᵀΣc⁻¹(x−μc)."
+  ],
+  "correct": 3,
+  "hint": "A Gaussian log density combines a volume term and a squared standardized distance.",
+  "why": "The Gaussian score contains the log prior, the negative half log determinant, and the negative half squared Mahalanobis distance. The determinant prevents a diffuse class from getting free credit everywhere simply because its standardized distances are small."
+ },
+ {
+  "group": "foundation",
+  "section": "9.2.1",
+  "topic": "Why quadratic?",
+  "page": "324",
+  "q": "Why do separate class covariance matrices generally produce quadratic boundaries?",
+  "a": [
+   "The xᵀΣc⁻¹x terms differ across classes, so they generally remain in the score difference.",
+   "A curved boundary requires unequal class priors.",
+   "Every Gaussian classifier ignores feature means.",
+   "Taking logarithms turns all quadratic expressions into linear ones."
+  ],
+  "correct": 0,
+  "hint": "Expand each squared Mahalanobis distance and compare the quadratic terms.",
+  "why": "For two classes, gA−gB includes a quadratic term involving ΣA⁻¹−ΣB⁻¹. Unless it cancels or has special structure, setting the difference to zero gives a quadratic boundary. QDA allows special parameter settings with simpler boundaries."
+ },
+ {
+  "group": "foundation",
+  "section": "9.2.2",
+  "topic": "Shared covariance",
+  "page": "325",
+  "q": "Which condition gives LDA’s linear pairwise decision boundaries?",
+  "a": [
+   "All classes must have diagonal covariance matrices, even if those diagonals differ.",
+   "All feature means must be zero.",
+   "All classes share the same covariance matrix, which can be full and correlated.",
+   "All class priors must be equal, even if covariances differ."
+  ],
+  "correct": 2,
+  "hint": "The entire covariance matrix must be the same across classes.",
+  "why": "With Σc=Σ, both the log determinant and xᵀΣ⁻¹x terms are common across classes. Dropping them leaves affine scores. A shared full matrix can retain feature correlations."
+ },
+ {
+  "group": "foundation",
+  "section": "9.2.2",
+  "topic": "Linear class scores",
+  "page": "325",
+  "q": "After removing terms common to all classes, which is the LDA score?",
+  "a": [
+   "gc(x)=log πc−½xᵀΣ⁻¹x, with no mean term.",
+   "gc(x)=πc+‖x−μc‖.",
+   "gc(x)=xᵀΣc⁻¹x only.",
+   "gc(x)=xᵀΣ⁻¹μc+log πc−½μcᵀΣ⁻¹μc."
+  ],
+  "correct": 3,
+  "hint": "The remaining x-dependent term is linear in x.",
+  "why": "Expanding −½(x−μc)ᵀΣ⁻¹(x−μc) leaves xᵀΣ⁻¹μc and −½μcᵀΣ⁻¹μc after the common quadratic term is removed. Adding log πc gives the affine score. The normalized posterior need not be linear in x."
+ },
+ {
+  "group": "foundation",
+  "section": "9.2.2",
+  "topic": "A shared correlated matrix",
+  "page": "325",
+  "q": "Two classes share Σ=[[2,0.8],[0.8,1]], but have different means. What can you conclude about their boundary?",
+  "a": [
+   "GDA is invalid unless the off-diagonal terms are zero.",
+   "The posterior must be a linear probability function.",
+   "The pairwise boundary is linear because the entire covariance is shared.",
+   "It must be quadratic because there is a nonzero correlation."
+  ],
+  "correct": 2,
+  "hint": "Correlated and shared describe different properties.",
+  "why": "Off-diagonal terms allow correlated features. Sharing the same matrix across classes is what causes the quadratic terms to cancel. Therefore the pairwise boundary is linear, although posterior probabilities are not generally linear functions."
+ },
+ {
+  "group": "fitting",
+  "section": "9.2.4",
+  "topic": "Separate parameter groups",
+  "page": "326–327",
+  "q": "Why can class priors and Gaussian parameters be fitted separately from labeled data?",
+  "a": [
+   "The joint log-likelihood separates into a prior term and Gaussian terms grouped by class.",
+   "The feature values do not affect the joint likelihood.",
+   "Covariance estimates are fixed before observing any data.",
+   "The posterior is automatically uniform in the training data."
+  ],
+  "correct": 0,
+  "hint": "Take the log of p(y) p(x | y) for every labeled example.",
+  "why": "The prior parameters appear in ∑n log πyn, while each class’s mean and covariance appear in that class’s Gaussian log-likelihood. These parameter groups can be optimized separately under the model."
+ },
+ {
+  "group": "fitting",
+  "section": "9.2.4",
+  "topic": "Class prior MLE",
+  "page": "327",
+  "q": "A dataset has 10 examples: 4 in A and 6 in B. What are the class-prior MLEs?",
+  "a": [
+   "πA=4 and πB=6.",
+   "πA=0.5 and πB=0.5.",
+   "πA=0.6 and πB=0.4.",
+   "πA=0.4 and πB=0.6."
+  ],
+  "correct": 3,
+  "hint": "Normalize the class counts by the total sample size.",
+  "why": "The categorical MLE is π̂c=Nc/N. Hence π̂A=4/10=0.4 and π̂B=6/10=0.6. Choosing equal priors would be an extra modeling choice, rather than this MLE."
+ },
+ {
+  "group": "fitting",
+  "section": "9.2.4",
+  "topic": "Gaussian MLE",
+  "page": "327",
+  "q": "For one class and one feature, the values are [0,2]. What are the Gaussian MLE mean and variance?",
+  "a": [
+   "Mean 1, variance 1.",
+   "Mean 2, variance 0.",
+   "Mean 1, variance 2.",
+   "Mean 0, variance 1."
+  ],
+  "correct": 0,
+  "hint": "The squared deviations from the mean sum to 2. Use the MLE denominator.",
+  "why": "The mean is (0+2)/2=1. The squared deviations are 1 and 1, so the MLE variance is 2/2=1. Dividing by N−1 would give the unbiased sample variance of 2, not the Gaussian MLE."
+ },
+ {
+  "group": "fitting",
+  "section": "9.2.4.1",
+  "topic": "Pooled covariance weights",
+  "page": "327",
+  "q": "Class A has NA=2 with covariance MLE 1. Class B has NB=6 with covariance MLE 4. What is the shared covariance MLE in this one-feature example?",
+  "a": [
+   "2.5.",
+   "3.25.",
+   "1.75.",
+   "5."
+  ],
+  "correct": 1,
+  "hint": "Weight each within-class covariance by its share of all examples.",
+  "why": "The shared MLE is (NAΣA+NBΣB)/N=(2×1+6×4)/8=26/8=3.25. An unweighted average would incorrectly give the smaller class as much influence as the larger class."
+ },
+ {
+  "group": "fitting",
+  "section": "9.2.4.1",
+  "topic": "Centering pooled residuals",
+  "page": "327",
+  "q": "Which residuals are used in the tied covariance MLE?",
+  "a": [
+   "The labels minus the predicted class probabilities.",
+   "Each input minus the mean of its own class.",
+   "Each input minus the global mean of all classes.",
+   "Each class mean minus the global mean only."
+  ],
+  "correct": 1,
+  "hint": "The shared covariance represents spread within a class.",
+  "why": "The tied estimate sums (xn−μ̂yn)(xn−μ̂yn)ᵀ and divides by N. Centering at a global mean would also include between-class differences and would estimate a different covariance."
+ },
+ {
+  "group": "fitting",
+  "section": "9.2.4.2",
+  "topic": "Diagonal is not tied",
+  "page": "327",
+  "q": "What does imposing separate diagonal covariance matrices do?",
+  "a": [
+   "It removes within-class feature correlations, but the boundary can still be quadratic.",
+   "It makes every class covariance identical.",
+   "It eliminates the need to estimate feature variances.",
+   "It guarantees spherical class distributions."
+  ],
+  "correct": 0,
+  "hint": "The diagonal entries can still differ across features and classes.",
+  "why": "Diagonal covariance removes cross-feature covariance terms. It does not tie the variances across classes, so class-dependent squared terms can remain and give QDA boundaries. Shared diagonal covariance would instead give diagonal LDA."
+ },
+ {
+  "group": "fitting",
+  "section": "9.2.4.2",
+  "topic": "Covariance parameter counts",
+  "page": "327",
+  "q": "With C=3 classes and D=4 features, how many covariance parameters are needed for separate full matrices, one shared full matrix, and separate diagonal matrices?",
+  "a": [
+   "30, 30, 12.",
+   "48, 16, 4.",
+   "12, 4, 3.",
+   "30, 10, 12."
+  ],
+  "correct": 3,
+  "hint": "A symmetric D×D matrix has D(D+1)/2 free entries.",
+  "why": "For D=4, a full symmetric covariance has 4×5/2=10 free entries. Three separate full matrices need 30; a shared full matrix needs 10; three diagonal matrices need 3×4=12. These counts exclude means and priors."
+ },
+ {
+  "group": "fitting",
+  "section": "9.2.4.3",
+  "topic": "Shrinkage calculation",
+  "page": "327",
+  "q": "ΣMLE=[[4,1.2],[1.2,1]]. Using λ=0.5 in λ diag(ΣMLE)+(1−λ)ΣMLE gives which covariance?",
+  "a": [
+   "[[1,0],[0,1]].",
+   "[[2,0.6],[0.6,0.5]].",
+   "[[4,1.2],[1.2,1]].",
+   "[[4,0.6],[0.6,1]]."
+  ],
+  "correct": 3,
+  "hint": "The two weighted diagonal terms add back to the original diagonal.",
+  "why": "The variances remain 4 and 1. Each off-diagonal term is multiplied by 1−λ=0.5, so 1.2 becomes 0.6. This shrinkage targets the diagonal of the original estimate, not an identity matrix."
+ },
+ {
+  "group": "fitting",
+  "section": "9.2.4",
+  "topic": "Insufficient data",
+  "page": "327",
+  "q": "A class has Nc=3 examples in D=5 dimensions. What can you say about its unconstrained covariance MLE?",
+  "a": [
+   "Its rank must be 5 regardless of the number of examples.",
+   "Its rank is at most 2, so it is singular in five dimensions.",
+   "It is guaranteed invertible because all features are continuous.",
+   "The MLE uses a denominator of 5 to guarantee invertibility."
+  ],
+  "correct": 1,
+  "hint": "Centering three points leaves at most two independent residual directions.",
+  "why": "A centered sample covariance has rank at most min(D,Nc−1). Here that is min(5,2)=2. It cannot be inverted as a 5×5 positive definite covariance. Tying, diagonal restrictions, or suitable regularization may help, depending on the data."
+ },
+ {
+  "group": "geometry",
+  "section": "9.2.5",
+  "topic": "Nearest centroid assumptions",
+  "page": "328",
+  "q": "When is Gaussian MAP classification equivalent to choosing the mean with minimum Mahalanobis distance under one common metric?",
+  "a": [
+   "When class priors are equal and covariance is shared across classes.",
+   "For every generative classifier regardless of its class densities.",
+   "Whenever covariance matrices are diagonal, even with unequal priors.",
+   "Whenever the priors are equal, even with arbitrary separate covariance matrices."
+  ],
+  "correct": 0,
+  "hint": "Both the prior term and the class-dependent volume term must drop from the comparison.",
+  "why": "Equal priors make log πc common. A shared covariance makes the log determinant common and supplies one common distance metric. Then maximizing the score is exactly minimizing squared Mahalanobis distance to the class means."
+ },
+ {
+  "group": "geometry",
+  "section": "9.2.5",
+  "topic": "Distance versus variance",
+  "page": "328",
+  "q": "x=(0,0), μA=(2,0), μB=(0,1), shared Σ=diag(9,1), and equal priors. Which class does Mahalanobis nearest centroid choose?",
+  "a": [
+   "A, because d²A=4/9 and d²B=1.",
+   "Neither, because a diagonal matrix cannot define a distance.",
+   "A and B tie because both priors are 0.5.",
+   "B, because its Euclidean distance is smaller."
+  ],
+  "correct": 0,
+  "hint": "Invert the variances before weighting the squared coordinate differences.",
+  "why": "Σ⁻¹=diag(1/9,1). Thus d²A=2²/9=4/9, while d²B=1²=1. A wins under the Gaussian metric even though B is nearer in ordinary Euclidean distance."
+ },
+ {
+  "group": "geometry",
+  "section": "9.2.5",
+  "topic": "Euclidean special case",
+  "page": "328",
+  "q": "Which shared covariance makes the Mahalanobis nearest-centroid class choice equivalent to ordinary Euclidean nearest-centroid classification?",
+  "a": [
+   "Any full covariance with positive determinant.",
+   "Any diagonal covariance, regardless of its diagonal values.",
+   "Any class-dependent covariance.",
+   "Σ=σ²I with σ²>0, assuming equal priors."
+  ],
+  "correct": 3,
+  "hint": "The metric must scale all coordinate directions equally.",
+  "why": "A shared spherical covariance gives d²=(1/σ²)‖x−μc‖². The positive common factor does not change which class is nearest. Unequal diagonal variances reweight coordinates and can change the winner."
+ },
+ {
+  "group": "geometry",
+  "section": "9.2.5",
+  "topic": "Learning a metric",
+  "page": "328",
+  "q": "A learned transform T defines d²(x,μ)=‖T(x−μ)‖². Which metric matrix does this correspond to?",
+  "a": [
+   "T+Tᵀ.",
+   "A matrix that must be diagonal.",
+   "The class prior vector.",
+   "TᵀT."
+  ],
+  "correct": 3,
+  "hint": "Expand the squared norm as a vector transposed times itself.",
+  "why": "Writing v=x−μ gives ‖Tv‖²=(Tv)ᵀ(Tv)=vᵀTᵀTv. The matrix TᵀT is positive semidefinite. The transform can be trained using a discriminative loss; it need not produce a diagonal metric."
+ },
+ {
+  "group": "geometry",
+  "section": "9.2.5",
+  "topic": "One-shot new classes",
+  "page": "328",
+  "q": "Why can a learned nearest class mean metric support one-shot learning of a new class?",
+  "a": [
+   "A single example estimates every entry in a full covariance matrix accurately.",
+   "All new classes must have exactly the same prototype.",
+   "Once a useful metric is learned, one labeled example can supply the new class prototype.",
+   "The metric no longer uses input features."
+  ],
+  "correct": 2,
+  "hint": "Separate learning the distance representation from supplying the new class mean.",
+  "why": "The learned transform can be reused. A single labeled new example can serve as μc for nearest class mean classification. This relies on an already useful metric and representative prototype; it does not mean one example fits a full Gaussian covariance."
+ },
+ {
+  "group": "geometry",
+  "section": "9.2.6",
+  "topic": "PCA versus FLDA: concepts",
+  "page": "328",
+  "q": "Why might PCA provide a poor projection for classification?",
+  "a": [
+   "PCA always discards every direction with nonzero variance.",
+   "PCA can only project into the original dimension.",
+   "PCA ignores labels, so directions with large overall variation may not separate the classes.",
+   "PCA requires class labels and always overfits them."
+  ],
+  "correct": 2,
+  "hint": "A direction useful for representing variation is not necessarily useful for distinguishing labels.",
+  "why": "PCA is unsupervised. Its projection can preserve large variation while mixing classes. The introduction to FLDA motivates using class information to seek projections useful for Gaussian classification."
+ },
+ {
+  "group": "geometry",
+  "section": "9.2.6",
+  "topic": "FLDA introduction: dimensions",
+  "page": "328",
+  "q": "For D=20 input features and C=3 classes, what is the maximum FLDA projection dimension stated in the introduction?",
+  "a": [
+   "3.",
+   "2.",
+   "19.",
+   "20."
+  ],
+  "correct": 1,
+  "hint": "The introductory bound is K≤C−1.",
+  "why": "The introduction states K≤C−1, so three classes allow at most two FLDA dimensions, even with 20 input features. This quiz uses the stated limit only; its derivation and later subsections are outside your reading scope."
+ }
+];
+let deck=[],answers=[],position=0,answered=false;
+function startQuiz(pool){deck=pool.slice();answers=[];position=0;$('quiz-start').hidden=true;$('quiz-results').hidden=true;$('quiz-active').hidden=false;renderQuestion();$('question-text').focus();}
+function renderQuestion(){answered=false;const q=deck[position],correctSoFar=answers.filter(a=>a.correct).length;$('question-count').textContent='Question '+(position+1)+' of '+deck.length;$('quiz-score').textContent=correctSoFar+' correct / '+answers.length+' answered';$('question-section').textContent='§'+q.section+' · '+q.topic;$('question-text').textContent=q.q;$('question-hint').hidden=true;$('question-hint').textContent=q.hint;$('question-feedback').hidden=true;$('show-hint').hidden=false;$('show-hint').disabled=false;$('show-hint').textContent='Show hint';$('next-question').disabled=true;$('next-question').textContent=position===deck.length-1?'See results →':'Next question →';$('question-progress').setAttribute('aria-valuemax',deck.length);setProgress(answers.length);const options=$('question-options');options.replaceChildren();q.a.forEach((text,i)=>{const b=document.createElement('button');b.type='button';b.className='option';const letter=document.createElement('span');letter.className='letter';letter.textContent='ABCD'[i];letter.setAttribute('aria-hidden','true');const label=document.createElement('span');label.textContent=text;b.append(letter,label);b.addEventListener('click',()=>answerQuestion(i));options.append(b);});}
+function setProgress(n){$('question-progress').setAttribute('aria-valuenow',n);$('question-progress-fill').style.width=(100*n/deck.length)+'%';}
+function answerQuestion(selected){if(answered)return;answered=true;const q=deck[position],correct=selected===q.correct;answers.push({q,selected,correct});[...$('question-options').children].forEach((b,i)=>{b.disabled=true;if(i===q.correct||i===selected){b.classList.add(i===q.correct?'correct':'wrong');const status=document.createElement('span');status.className='option-state';status.textContent=i===q.correct?(i===selected?'Your answer · Correct':'Correct answer'):'Your answer · Incorrect';b.lastElementChild.append(status);}});const fb=$('question-feedback');fb.replaceChildren();fb.className='feedback'+(correct?'':' wrong');const title=document.createElement('strong');title.textContent=correct?'Correct. Here’s why.':'Not quite. Here’s the reasoning.';const explanation=document.createElement('p');explanation.textContent=q.why;const ref=document.createElement('p');ref.className='small muted';ref.textContent='Review §'+q.section+' · textbook p. '+q.page;fb.append(title,explanation,ref);fb.hidden=false;$('show-hint').hidden=true;$('next-question').disabled=false;setProgress(answers.length);$('quiz-score').textContent=answers.filter(a=>a.correct).length+' correct / '+answers.length+' answered';}
+$('start-quiz').addEventListener('click',()=>{const focus=$('quiz-focus').value;startQuiz(questions.filter(q=>focus==='all'||q.group===focus));});
+$('show-hint').addEventListener('click',()=>{$('question-hint').hidden=false;$('show-hint').disabled=true;$('show-hint').textContent='Hint shown';});
+$('next-question').addEventListener('click',()=>{if(!answered)return;if(position===deck.length-1)showResults();else{position++;renderQuestion();$('question-text').focus();}});
+function showResults(){
+ $('quiz-active').hidden=true;const container=$('quiz-results');container.replaceChildren();container.hidden=false;const correct=answers.filter(a=>a.correct).length,missed=answers.filter(a=>!a.correct).map(a=>a.q);
+ const intro=document.createElement('div');intro.className='card';const eyebrow=document.createElement('p');eyebrow.className='eyebrow muted';eyebrow.textContent='Practice complete';const heading=document.createElement('h2');heading.textContent=missed.length?'You have a focused review plan.':'All concepts answered correctly.';const score=document.createElement('p');score.className='score-number';score.textContent=correct+' / '+deck.length;const caption=document.createElement('p');caption.className='muted';caption.textContent=Math.round(100*correct/deck.length)+'% correct on first answers in this round.';intro.append(eyebrow,heading,score,caption);
+ const actions=document.createElement('div');actions.className='result-actions';if(missed.length){const retry=document.createElement('button');retry.className='btn primary';retry.textContent='Retry '+missed.length+' missed question'+(missed.length===1?'':'s');retry.addEventListener('click',()=>startQuiz(missed));actions.append(retry);}const again=document.createElement('button');again.className='btn'+(missed.length?'':' primary');again.textContent='Choose a new round';again.addEventListener('click',()=>{container.hidden=true;$('quiz-start').hidden=false;$('start-quiz').focus();});const review=document.createElement('button');review.className='btn quiet';review.textContent='Return to review';review.addEventListener('click',()=>{selectTab($('review-tab'));$('review-tab').focus();});actions.append(again,review);intro.append(actions);container.append(intro);
+ const title=document.createElement('h3');title.style.marginTop='32px';title.textContent='Your answers, with explanations';container.append(title);
+ answers.forEach((answer,i)=>{const item=document.createElement('div');item.className='review-item';const tag=document.createElement('p');tag.className='tag';tag.textContent=(answer.correct?'Correct':'Review this')+' · §'+answer.q.section+' · p. '+answer.q.page;const question=document.createElement('h3');question.textContent=(i+1)+'. '+answer.q.q;const yours=document.createElement('p');yours.className='small';yours.textContent='Your answer: '+answer.q.a[answer.selected];item.append(tag,question,yours);if(!answer.correct){const right=document.createElement('p');right.className='small';right.textContent='Correct answer: '+answer.q.a[answer.q.correct];item.append(right);}const explanation=document.createElement('p');explanation.className='small muted';explanation.textContent=answer.q.why;item.append(explanation);container.append(item);});
+ container.scrollIntoView({block:'start',behavior:'auto'});heading.tabIndex=-1;heading.focus();
+}
+
+})();
+</script>
+</body>
+</html>
