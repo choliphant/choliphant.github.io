@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Offline CS473 companion to Murphy 16.1, 16.2.2–16.2.4: KNN, embeddings, Siamese networks, triplet loss, and N-pairs. Five interactive experiments and 30 learning questions."><title>CS473 · Learning what is similar</title><style>
+
+:root{color-scheme:light;--bg:#f5f3ec;--paper:#fffef9;--ink:#172f30;--muted:#506260;--line:#d6dfd8;--accent:#176b58;--soft:#e7f0e7;--gold:#eed48b;--error:#9f342f;--error-bg:#fff0ec;--correct:#146346;--shadow:0 12px 40px #15352a08}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button,a,input,select,summary{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{cursor:default;opacity:.55}a{color:var(--accent);text-underline-offset:3px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #c27a10;outline-offset:4px}h1,h2,h3,p{margin-top:0}h1,h2,h3{line-height:1.2}h1{font-family:Georgia,serif;font-size:clamp(2.45rem,5.6vw,4.8rem);font-weight:400;letter-spacing:-.045em;max-width:850px;margin-bottom:22px}h2{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.8rem,3.3vw,2.7rem);letter-spacing:-.025em;margin-bottom:18px}h3{font-size:1.15rem;margin-bottom:13px}p{margin-bottom:16px}small,.small{font-size:.875rem}.muted{color:var(--muted)}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.76rem;font-weight:700}.wrap{max-width:1120px;margin:auto;padding:0 32px}.top{display:flex;justify-content:space-between;align-items:center;padding-top:24px;padding-bottom:24px;border-bottom:1px solid var(--line);gap:20px}.brand{font-weight:750;letter-spacing:-.02em}.brand span{font-weight:400;color:var(--muted)}.edition{font-size:.8rem;color:var(--muted)}.hero{padding-top:50px;padding-bottom:32px}.hero .eyebrow{color:var(--accent);margin-bottom:18px}.lead{font-size:1.1rem;max-width:690px;color:var(--muted)}.route{display:flex;gap:24px;flex-wrap:wrap;font-size:.85rem;margin-top:26px}.route span{display:flex;gap:9px;align-items:center}.route b{border:1px solid var(--line);border-radius:50%;width:25px;height:25px;display:inline-grid;place-items:center;font-weight:500}.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:6px}.tab{border:0;background:transparent;padding:16px 22px;color:var(--muted);font-weight:600;border-bottom:3px solid transparent}.tab[aria-selected=true]{border-bottom-color:var(--accent);color:var(--accent)}[hidden]{display:none!important}.panel{padding:34px 0 56px}.section-top{display:flex;justify-content:space-between;gap:18px;align-items:start;margin-bottom:20px}.section-top p{max-width:700px}.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:7px;padding:9px 16px;min-height:44px;font-size:.9rem;font-weight:600}.btn:hover:not(:disabled){border-color:var(--accent);background:var(--soft)}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.primary:hover:not(:disabled){background:#105441}.btn.quiet{background:transparent}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:26px;box-shadow:var(--shadow);min-width:0}.card .eyebrow{color:var(--accent);margin-bottom:12px}.wide{grid-column:1/-1}.anchor-nav{display:flex;flex-wrap:wrap;gap:8px 17px;font-size:.85rem;margin:0 0 28px}.rule{height:1px;background:var(--line);margin:32px 0}.formula{background:var(--soft);padding:15px 18px;border-radius:7px;font-family:Georgia,serif;font-size:1.08rem;line-height:1.8;overflow-wrap:anywhere;margin:15px 0}.formula small{font-family:system-ui,sans-serif;font-size:.8rem}.formula sub,.formula sup{font-size:.72em}.note{border-left:3px solid var(--accent);padding:2px 0 2px 16px;margin:18px 0}.note p:last-child{margin-bottom:0}ul,ol{padding-left:22px;margin-top:10px}li{padding-left:3px;margin-bottom:8px}.compact li{margin-bottom:5px}.source{font-size:.78rem;color:var(--muted);margin-top:18px;margin-bottom:0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{text-align:left;vertical-align:top;padding:13px 10px;border-bottom:1px solid var(--line)}th{font-weight:650;color:var(--accent)}td:first-child,th:first-child{padding-left:0}td:last-child,th:last-child{padding-right:0}.two-col{columns:2;column-gap:32px}.two-col li{break-inside:avoid}details{border-top:1px solid var(--line);padding:14px 0}details:last-child{padding-bottom:0}summary{cursor:pointer;font-weight:600}details p{margin:12px 0 0}.steps{counter-reset:step;list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.steps li{padding:0;position:relative}.steps b{display:block;margin-bottom:7px}.steps b:before{counter-increment:step;content:counter(step)" / ";color:var(--accent)}.lab-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:24px}.field{display:flex;flex-direction:column;gap:7px;margin-bottom:22px}.field label{font-size:.9rem;font-weight:600}select,input[type=number]{width:100%;border:1px solid #9bab9f;border-radius:6px;background:var(--paper);color:var(--ink);padding:10px;min-height:44px}input[type=range]{width:100%;accent-color:var(--accent)}.value-row{display:flex;justify-content:space-between;gap:15px}.value-row output{font-variant-numeric:tabular-nums}.prob-row{margin:22px 0}.prob-label{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px}.prob-label strong{font-size:1.5rem;line-height:1.3;font-weight:500;font-variant-numeric:tabular-nums}.track{height:13px;border-radius:4px;background:#e1e6dd;overflow:hidden}.fill{height:100%;background:var(--accent);transition:width .2s}.fill.alt{background:#a07b2b}.calc{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.85rem;overflow-wrap:anywhere;background:var(--bg);padding:14px;border-radius:7px;margin-top:18px}.result-label{font-size:.85rem;color:var(--muted)}.lab-insight{padding-top:18px;border-top:1px solid var(--line);margin-top:24px}.quiz-shell{max-width:820px;margin:auto}.quiz-intro{max-width:700px}.quiz-config{display:flex;gap:14px;align-items:end;flex-wrap:wrap;margin:24px 0}.quiz-config .field{margin:0;flex:1;min-width:180px}.quiz-status{display:flex;justify-content:space-between;gap:15px;align-items:center;font-size:.85rem;color:var(--muted);margin-bottom:10px}.quiz-progress{height:5px;background:var(--line);border-radius:5px;overflow:hidden;margin-bottom:28px}.quiz-progress div{height:100%;background:var(--accent);transition:width .2s}.question{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.3rem,3vw,1.7rem);line-height:1.4;margin:14px 0 22px}.options{display:grid;gap:12px}.option{display:flex;gap:13px;align-items:flex-start;min-height:54px;text-align:left;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:14px 17px;border-radius:8px;font-size:.95rem;line-height:1.5}.option .letter{display:grid;place-items:center;flex-shrink:0;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);font-size:.75rem}.option:hover:not(:disabled){border-color:var(--accent);background:var(--soft)}.option:disabled{opacity:1}.option.correct{border-color:var(--correct);background:#e8f3e9}.option.wrong{border-color:var(--error);background:var(--error-bg)}.option-state{display:block;font-weight:650;font-size:.8rem;margin-top:5px}.feedback{padding:20px;border-radius:8px;background:var(--soft);margin-top:20px}.feedback.wrong{background:var(--error-bg)}.feedback strong{display:block;margin-bottom:7px}.feedback p:last-child{margin-bottom:0}.quiz-actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:22px}.hint{font-size:.9rem;color:var(--muted);margin-top:17px;border-left:3px solid var(--gold);padding-left:14px}.score-number{font-family:Georgia,serif;font-size:3.3rem;line-height:1.1;margin:20px 0 8px}.result-actions{display:flex;gap:12px;flex-wrap:wrap;margin:23px 0}.review-item{padding:18px 0;border-top:1px solid var(--line)}.review-item p:last-child{margin-bottom:0}.tag{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.footer{border-top:1px solid var(--line);padding:24px 0 36px;font-size:.8rem;color:var(--muted)}.footer p{margin-bottom:7px}.mini-chart{display:flex;align-items:end;gap:18px;height:170px;padding-top:18px;margin:20px 0}.mini-bar-group{flex:1;height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;text-align:center;font-size:.85rem;gap:8px}.mini-bar{width:65%;max-width:100px;min-height:2px;background:var(--accent);border-radius:5px 5px 0 0}.big-number{font-family:Georgia,serif;font-size:2.4rem;line-height:1.1;margin:20px 0 8px}.checklist label{display:flex;gap:12px;align-items:start;margin:12px 0}.checklist input{margin-top:6px;accent-color:var(--accent);width:18px;height:18px;flex-shrink:0}.print-only{display:none}
+@media(max-width:760px){.wrap{padding-left:20px;padding-right:20px}.top{align-items:start}.edition{max-width:170px;text-align:right}.hero{padding-top:35px}.grid,.lab-grid{grid-template-columns:1fr}.wide{grid-column:auto}.steps{grid-template-columns:1fr}.two-col{columns:1}.section-top{display:block}.section-top .btn{margin-bottom:10px}.tab{padding:14px 16px}.card{padding:22px}.route{gap:14px}.quiz-status{align-items:start}.footer{overflow-wrap:anywhere}}
+@media(max-width:380px){.wrap{padding-left:14px;padding-right:14px}.tab{padding:14px 11px;font-size:.9rem}.card{padding:17px}.edition{font-size:.7rem}.option{padding:12px}.quiz-actions .btn{flex:1}.quiz-status{font-size:.78rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{body{background:white;color:black;font-size:10pt}.wrap{max-width:none;padding:0}.top,.hero .route,.tabs,.anchor-nav,.no-print,.footer{display:none!important}.hero{padding:0 0 15px}.hero h1{font-size:28pt}.hero .lead{font-size:11pt}.panel{padding:0}#review-panel{display:block!important}#lab-panel,#quiz-panel{display:none!important}.grid{display:block}.card{border:0;box-shadow:none;border-radius:0;padding:12px 0;break-inside:avoid}.formula{background:#f1f1ed}.print-only{display:block}.two-col{columns:1}.section-top{margin:0}.rule{margin:10px 0}details{display:none}h2{font-size:19pt}h3{font-size:13pt}a{color:black;text-decoration:none}.source{font-size:8pt}}
+
+.scope{font-size:.85rem;border-left:3px solid var(--gold);padding:6px 0 6px 15px;max-width:790px;margin-top:25px}.chart{width:100%;height:auto;display:block;touch-action:manipulation;background:#fffef9}.chart-frame{max-width:600px;margin:auto}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.85rem;margin-top:12px}.legend span{display:flex;align-items:center;gap:7px}.key{width:12px;height:12px;display:inline-block;background:#176b58}.key.b{background:#a07b2b;border-radius:50%}.matrix{font-family:ui-monospace,monospace;white-space:pre;font-size:.82rem;line-height:1.7;overflow-x:auto}.lab-detail{font-size:.85rem;margin-top:12px}.mini-label{font-size:.8rem;color:var(--muted)}.lab-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}.field-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}.checklist input{min-width:18px}.model-summary{font-size:.85rem;margin:12px 0 0}canvas:focus-visible{outline:3px solid #c27a10;outline-offset:3px}.quiz-shell:focus{outline:none}@media(max-width:760px){.lab-grid{grid-template-columns:1fr}.field-pair{grid-template-columns:1fr 1fr}}@media(max-width:380px){.field-pair{grid-template-columns:1fr}.tabs{gap:0}.tab{padding-left:9px;padding-right:9px}}
+@media(max-width:760px){.tabs{gap:0}.tab{padding:14px 8px;font-size:.9rem;white-space:nowrap;flex:1}}
+
+.flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.3fr) auto minmax(0,1fr);gap:10px;align-items:center;margin:12px 0}.node{background:var(--soft);padding:13px;border:1px solid var(--line);border-radius:8px;text-align:center;font-size:.9rem;overflow-wrap:anywhere}.node.encoder{border:2px solid var(--accent)}.shared{color:var(--accent);font-size:.85rem;text-align:center;margin:12px 0}.chart-svg{width:100%;height:auto;display:block;background:var(--paper)}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.metric{border-top:2px solid var(--line);padding-top:10px;min-width:0}.metric b{font-size:1.55rem;font-weight:500;display:block;font-variant-numeric:tabular-nums}.metric span{font-size:.8rem;color:var(--muted)}.preset-row{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.status{border-left:3px solid var(--accent);padding:10px 14px;background:var(--soft);font-size:.95rem}.reading-map li{margin-bottom:9px}.code{font: .9rem/1.7 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--bg);padding:16px;border-radius:8px}.formula .roman{font-family:system-ui,sans-serif;font-size:.85rem}.loss-label{display:inline-block;padding:3px 9px;border-radius:5px;background:var(--soft);font-size:.8rem}.metrics.two{grid-template-columns:repeat(2,minmax(0,1fr))}.card h4{font-size:1rem;margin:22px 0 8px}.nowrap{white-space:nowrap}.anchor-nav a{padding:3px 0}svg text{font-family:system-ui,sans-serif}.lab-description{max-width:780px}.legend .dot{width:12px;height:12px;border-radius:50%;display:inline-block}.answer-check{margin-bottom:0}.table-wrap:focus-visible{outline:3px solid #c27a10}.table-wrap table{min-width:470px}button{touch-action:manipulation}.panel{scroll-margin-top:20px}h1{max-width:950px}.source{overflow-wrap:anywhere}
+@media(max-width:760px){.flow{gap:5px}.node{padding:10px;font-size:.85rem}.metrics{gap:8px}.metric b{font-size:1.3rem}.lab-description{font-size:.95rem}}
+@media(max-width:380px){.flow{grid-template-columns:minmax(0,1fr)}.flow .arrow{display:none}.metrics{grid-template-columns:1fr 1fr}.metrics .metric:last-child{grid-column:1/-1}.metrics.two .metric:last-child{grid-column:auto}.brand{font-size:.9rem}.edition{max-width:130px}.hero{padding-top:28px}.lead{font-size:1rem}}
+@media print{.flow{grid-template-columns:1fr auto 1.3fr auto 1fr}.flow .arrow{display:block}.node{padding:6px}.card.wide{break-inside:auto}.scope{font-size:9pt}.card p,.card li{orphans:3;widows:3}.formula{break-inside:avoid}.table-wrap{overflow:visible}.table-wrap table{min-width:0}.source{color:#333}}
+</style></head><body>
+<header class="wrap top"><div class="brand">CS473 <span>/ study companion</span></div><div class="edition">Murphy · Chapter 16<br>16.1, 16.2.2–16.2.4</div></header>
+<main class="wrap"><section class="hero"><p class="eyebrow">From nearest neighbors to learned similarity</p><h1>Learning what<br>is similar.</h1><p class="lead">Why should two images be neighbors? Connect KNN to learned embeddings, then build an intuition for Siamese and triplet networks: shared weights, positive and negative examples, and the margin that drives learning.</p><div class="route"><span><b>1</b> Review the ideas</span><span><b>2</b> Experiment with losses</span><span><b>3</b> Explain your reasoning</span></div><p class="scope"><strong>Your reading scope:</strong> all of §16.1 (including §§16.1.1–16.1.4.2), §16.2.2, §16.2.3, and all of §16.2.4 (contrastive, triplet, and N-pairs losses). §16.2.1 and §16.2.5 onward are outside this guide.</p></section>
+<nav class="tabs" role="tablist" aria-label="Study modes"><button class="tab" id="review-tab" role="tab" aria-selected="true" aria-controls="review-panel" tabindex="0">Review</button><button class="tab" id="lab-tab" role="tab" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Similarity lab</button><button class="tab" id="quiz-tab" role="tab" aria-selected="false" aria-controls="quiz-panel" tabindex="-1">Learning quiz</button></nav>
+
+<section class="panel" id="review-panel" role="tabpanel" aria-labelledby="review-tab">
+<div class="section-top"><div><p class="eyebrow muted">The study map</p><h2>Learn the space. Then compare.</h2><p class="muted">The review follows your reading, with extra detail on Siamese and triplet networks. Notes, diagrams, numerical examples, and questions are original study material based on the local textbook.</p></div><button class="btn no-print" id="print-review">Print review</button></div>
+<nav class="anchor-nav" aria-label="Review topics"><a href="#knn">KNN</a><a href="#curse">High dimensions</a><a href="#open">Open world</a><a href="#embedding">Embeddings</a><a href="#classification">Classification losses</a><a href="#siamese">Siamese</a><a href="#triplet">Triplets</a><a href="#npairs">N-pairs</a><a href="#checklist">Check yourself</a></nav>
+<div class="grid">
+<article class="card wide"><p class="eyebrow">Start here · the connection</p><h3>A neighbor is only as useful as your notion of distance.</h3><ol class="steps"><li><b>Store examples</b>KNN compares a query with labeled examples in a gallery. The gallery can grow as new classes arrive.</li><li><b>Learn a representation</b>A neural network maps raw inputs into vectors. Train the representation so relevant similarity appears in the geometry.</li><li><b>Compare embeddings</b>Use distance for retrieval, nearest neighbor classification, or verification. Siamese and triplet training teach the representation how to compare.</li></ol><p class="note"><strong>Running example:</strong> two photos of the same person should be similar despite lighting or pose; two different people should be distinguishable. “Positive” means a matching example, not a positive coordinate or a class called “positive.” The application determines what should count as a match.</p><p class="source">Conceptual connection: §§16.1, 16.1.4, 16.2.2, 16.2.4 · pp. 547–551, 554–556</p></article>
+<article class="card" id="knn"><p class="eyebrow">16.1 &amp; 16.1.1 · K nearest neighbors</p><h3>Let nearby examples vote.</h3><p>Store the labeled training examples. For a new query x, find its K nearest examples and estimate each class probability by its fraction of the neighborhood.</p><div class="formula">p(y = c | x, D) = (1/K) ∑<sub>n ∈ N<sub>K</sub>(x,D)</sub> I(y<sub>n</sub> = c)<br><small>Eq. 16.1 · I is 1 when its condition is true, otherwise 0.</small></div><p><strong>Original practice:</strong> with labels [A, B, A, A, B], K = 5 gives p(A | x) = 3/5 = 0.6. These are neighborhood vote fractions, not a guarantee that 60% of all such predictions will be right.</p><p>The two key choices are <strong>K and the distance metric</strong>. With K = 1, each training example owns a Voronoi cell. With distinct training locations, counting each point itself yields zero 1-NN training error; this does not imply good test accuracy.</p><p class="note">Small K can fit noise; larger K smooths decisions and may underfit. Choose K using validation data. K is a neighbor count, not the number of classes.</p><p class="source">§§16.1–16.1.1 · pp. 547–549 · PDF pp. 577–579</p></article>
+<article class="card" id="curse"><p class="eyebrow">16.1.2 &amp; 16.1.3 · Limits of raw neighbors</p><h3>“Nearest” may still be far away.</h3><p>For uniform data in a unit D-dimensional cube, a cube covering volume fraction p has side length s satisfying s<sup>D</sup> = p. Hence:</p><div class="formula">s = p<sup>1/D</sup><br>p = 0.10, D = 10 → s ≈ 0.794<br>p = 0.01, D = 10 → s ≈ 0.631</div><p>This idealized volume argument explains why local estimation becomes difficult in high dimension. A useful representation can discard irrelevant variation; it does not guarantee that all high-dimensional problems become easy.</p><p><strong>Storage and search:</strong> KNN retains its examples. A brute-force scan evaluates distances to all N examples (roughly O(ND) coordinate work for D-dimensional Euclidean vectors), plus neighbor selection. Pruning can reduce storage; partitioning structures, hashing, and approximate nearest neighbor search can reduce search work, with tradeoffs.</p><p class="small muted">The book discusses k-d trees, clustering based indexes, LSH, and FAISS. There is no universal dimension at which every exact search method stops working well; efficiency depends on the data and index.</p><p class="source">§§16.1.2–16.1.3 · pp. 548–550 · PDF pp. 578–580</p></article>
+<article class="card wide" id="open"><p class="eyebrow">16.1.4 · Open set recognition</p><h3>A nearest match is not automatically a valid match.</h3><p>A fixed classifier must choose from its known classes unless it has a rejection mechanism. In an open world, the query may belong to an unseen category. Compare the query with a gallery, then decide whether the best match is sufficiently similar.</p><div class="grid"><div><h4>Distinguish these situations</h4><ul class="compact"><li><strong>Known identity:</strong> another image of a person already in the gallery.</li><li><strong>Novel class:</strong> a new person who is absent from the gallery.</li><li><strong>OOD input:</strong> an unrelated input, such as a dog image arriving at a face system.</li><li><strong>Incremental learning:</strong> after obtaining a new label, add examples and expand the known class set.</li></ul></div><div><h4>What a useful embedding enables</h4><p>Verification compares two examples; identification searches a gallery. Few-shot classification uses only a few labeled examples for a new class. A learned embedding can be reused while the gallery grows.</p><p class="note">A distance threshold is a separate decision rule. The training margin is not automatically the right verification threshold. Rejecting a match does not by itself establish whether the cause is a new class or OOD input.</p></div></div><p>Other open world applications include <strong>entity resolution</strong> (do two names refer to the same entity?) and <strong>multi-object tracking</strong> (is this observation an existing tracked object or a new one?). Both need a meaningful matching rule.</p><p class="source">§§16.1.4.1–16.1.4.2 · pp. 550–551 · PDF pp. 580–581</p></article>
+<article class="card wide" id="embedding"><p class="eyebrow">16.2.2 · Deep metric learning</p><h3>The network outputs a vector, not just a class.</h3><div class="formula">e = f(x; θ) ∈ ℝ<sup>L</sup>, &nbsp; ê = e / ‖e‖₂ &nbsp; (e ≠ 0)<br>r<sub>ij</sub> = ‖ê<sub>i</sub> − ê<sub>j</sub>‖₂<br>q<sub>ij</sub> = r<sub>ij</sub>² = 2 − 2s<sub>ij</sub>, &nbsp; s<sub>ij</sub> = ê<sub>i</sub><sup>T</sup>ê<sub>j</sub><br><small>Eqs. 16.7–16.9 · Smaller r or q means closer; larger cosine similarity s means more similar.</small></div><p>Normalization places nonzero embeddings on the unit hypersphere. Then cosine similarity lies in [−1, 1], Euclidean distance r in [0, 2], and squared distance q in [0, 4]. A zero embedding needs explicit numerical handling before normalization.</p><div class="grid"><div><h4>Original practice: a 60° angle</h4><p>For unit vectors a = (1, 0) and b = (1/2, √3/2), s = 1/2. Thus q = 2 − 2(1/2) = 1 and r = 1. The ordering by largest cosine equals the ordering by smallest normalized Euclidean distance.</p></div><div><h4>What supervision is needed?</h4><p>Class labels can define matching pairs, but known pair relationships can also provide supervision. The network learns the aspects that those relationships reward. It does not discover a universal definition of semantic similarity.</p></div></div><div class="note"><p><strong>Notation guide for the losses:</strong> this companion always uses <strong>r for Euclidean distance</strong> and <strong>q = r² for squared distance</strong>. Eq. 16.7 writes a squared distance as d, while Eqs. 16.10–16.11 also contain d². To avoid silently squaring twice, the loss examples below explicitly use the conventional Euclidean r and squared q forms. If you instead choose squared distance as the base d in those equations, you obtain a different numerical objective; do not mix the conventions.</p></div><p class="source">§16.2.2 · p. 554 · PDF p. 584; loss notation checked against pp. 555–556</p></article>
+<article class="card wide" id="classification"><p class="eyebrow">16.2.3 · Classification losses</p><h3>Correct classes do not guarantee useful distances.</h3><p>One simple method is to train a classifier and reuse a hidden layer, commonly the penultimate layer, as an embedding. This is scalable and uses ordinary class supervision. But being on the correct side of a decision boundary does not force same-class examples to be close or different-class examples to be far apart.</p><p><strong>Original thought experiment:</strong> a classifier uses only the first coordinate to separate two classes. Points (1, 100) and (1, −100) can both be confidently classified as A while remaining 200 units apart. Classification can succeed while within-class geometry is poor.</p><p class="note">Ranking losses train the relationships more directly. They can use “these match / these do not” supervision without requiring a named class for every example. This still requires a justified way to create those relationships.</p><p class="source">§16.2.3 · p. 554 · PDF p. 584</p></article>
+<article class="card wide" id="siamese"><p class="eyebrow">16.2.4.1 · Pairwise contrastive loss</p><h2>One encoder. Two uses.</h2><p>A <strong>Siamese network</strong> applies the same feature extractor to two inputs. The two branches share θ: they are two evaluations of one learned function. This is more than using the same architecture or starting from identical weights.</p><div class="flow"><div class="node">Image xᵢ</div><span class="arrow">→</span><div class="node encoder">f( · ; θ)</div><span class="arrow">→</span><div class="node">Embedding êᵢ</div></div><div class="shared">↕ One parameter set θ is used in both rows ↕</div><div class="flow"><div class="node">Image xⱼ</div><span class="arrow">→</span><div class="node encoder">f( · ; θ)</div><span class="arrow">→</span><div class="node">Embedding êⱼ</div></div><p class="small muted">Compare the two outputs, compute one loss, then backpropagate through both uses of the encoder. Their gradient contributions accumulate into the shared parameters.</p><div class="formula">t = 1 for a similar pair; t = 0 for a dissimilar pair<br>L<sub>pair</sub> = t r² + (1 − t) [max(0, m − r)]², &nbsp; m &gt; 0<br><small>Eq. 16.10 in the explicit r = Euclidean-distance convention used throughout this guide; no extra factor of ½.</small></div><div class="grid"><div><h4>Similar pair: pull together</h4><p>L = r². With r = 0.7, the loss is 0.49. Positive pairs keep paying until their distance is zero in this objective; there is no positive-pair safety margin here.</p><p>For r &gt; 0, ∂L/∂r = 2r. Minimizing the loss favors a smaller distance.</p></div><div><h4>Dissimilar pair: separate enough</h4><p>L = max(0, m − r)². With m = 1 and r = 0.7, the loss is 0.09. With r = 1.2, the loss is zero. “Push apart” stops once the safety margin is reached.</p><p>For r &lt; m, ∂L/∂r = −2(m − r); for r ≥ m it is zero. These are distance derivatives; encoder gradients also require the chain rule.</p></div></div><p class="note"><strong>Avoid collapse:</strong> pulling only positive pairs together permits every input to get the same embedding. Dissimilar pairs penalize that collapsed solution. The loss alone does not guarantee that an optimizer will find a good representation.</p><p><strong>Training vs. use:</strong> training needs paired inputs and match information to compute the loss. Later, encode each gallery example once and encode a query with the same f. Retrieval or verification compares the vectors; it need not rerun a separate neural classifier for every pair.</p><p class="small muted">Naively enumerating all training pairs scales as O(N²). The Siamese architecture describes shared branches; contrastive loss is the particular objective here. The terms are related, but not synonyms for every possible architecture or loss.</p><p class="source">§16.2.4.1 · p. 555 · PDF p. 585 · Fig. 16.5a and Eq. 16.10</p></article>
+<article class="card wide" id="triplet"><p class="eyebrow">16.2.4.2 · Triplet loss</p><h2>One anchor. Two comparisons.</h2><p>A triplet contains an <strong>anchor a</strong>, a <strong>positive p</strong> that should match the anchor, and a <strong>negative n</strong> that should not. All three pass through the same encoder. The loss couples the two anchor distances in one comparison.</p><div class="grid"><div><div class="node encoder">a → f( · ; θ) → ê<sub>a</sub><br>p → f( · ; θ) → ê<sub>p</sub><br>n → f( · ; θ) → ê<sub>n</sub></div><p class="shared">Three uses of the same θ, not three independently trained models.</p></div><div><p>The anchor is the reference for both distances. The loss below does <strong>not</strong> directly contain the positive–negative distance. A negative is simply dissimilar to this anchor; it need not be dissimilar to every other negative.</p></div></div><div class="formula">q<sub>ap</sub> = ‖ê<sub>a</sub> − ê<sub>p</sub>‖₂², &nbsp; q<sub>an</sub> = ‖ê<sub>a</sub> − ê<sub>n</sub>‖₂²<br>L<sub>triplet</sub> = max(0, q<sub>ap</sub> − q<sub>an</sub> + m)<br>L = 0 ⇔ q<sub>an</sub> ≥ q<sub>ap</sub> + m<br><small>Eq. 16.11 with d treated as Euclidean distance, so d² is q. This margin is in squared-distance units.</small></div><div class="grid"><div><h4>Correct order, insufficient margin</h4><p>Let q<sub>ap</sub> = 0.4, q<sub>an</sub> = 0.6, and m = 0.5. The positive is closer, but L = max(0, 0.4 − 0.6 + 0.5) = <strong>0.3</strong>. The required negative distance is at least 0.9.</p><p>Zero loss at q<sub>an</sub> = 0.9 does not require moving the positive all the way onto the anchor.</p></div><div><h4>What learning tries to do</h4><p>Inside the active hinge, ∂L/∂q<sub>ap</sub> = +1 and ∂L/∂q<sub>an</sub> = −1. Minimization favors reducing the positive distance and/or increasing the negative distance. Outside the hinge, this triplet contributes no gradient; at the boundary a subgradient convention is used.</p><p>Actual movement depends on the shared encoder, normalization, and the other triplets. A loss plot is not a simulation of full network training.</p></div></div><h4>Why unit normalization matters to the margin</h4><p>Because q = 2 − 2s, the zero-loss condition is equivalent to <strong>s<sub>ap</sub> − s<sub>an</sub> ≥ m/2</strong>. With m = 0.5, the required cosine gap is 0.25. For unit vectors q lies in [0, 4], so a margin above 4 is impossible even for an ideal single triplet; a particular dataset may make much smaller margins infeasible too.</p><p class="note"><strong>Pairwise vs. triplet:</strong> contrastive training asks “is this pair close, or at least m apart?” Triplet training asks “is the positive closer than the negative by at least m in squared distance?” A triplet can have zero loss while its positive distance remains nonzero. A collapsed embedding has triplet loss m, so collapse is not a zero-loss solution.</p><p class="small muted">All possible triples give a naive O(N³) enumeration. In practice the book uses minibatches containing a positive and a negative for an anchor. Each triplet still compares just one negative. Detailed sampling and mining techniques in §16.2.5 are outside your assigned scope.</p><p class="source">§16.2.4.2 · pp. 555–556 · PDF pp. 585–586 · Fig. 16.5b and Eq. 16.11</p></article>
+<article class="card wide" id="npairs"><p class="eyebrow">16.2.4.3 · N-pairs loss</p><h3>Ask the positive to win against several negatives.</h3><p>Triplet loss sees one negative at a time. N-pairs compares one anchor with one positive and N − 1 negatives. Here N counts candidates in this loss, not necessarily the full training dataset size.</p><div class="formula">s<sub>+</sub> = ê<sub>a</sub><sup>T</sup>ê<sub>p</sub>, &nbsp; s<sub>k</sub><sup>−</sup> = ê<sub>a</sub><sup>T</sup>ê<sub>nₖ</sub><br>L = log[1 + ∑<sub>k=1</sub><sup>N−1</sup> exp(s<sub>k</sub><sup>−</sup> − s<sub>+</sub>)]<br>= −log[exp(s<sub>+</sub>) / (exp(s<sub>+</sub>) + ∑<sub>k</sub> exp(s<sub>k</sub><sup>−</sup>))]<br><small>Eqs. 16.12–16.13 · Softmax cross-entropy with the positive candidate as the target.</small></div><p><strong>Original practice:</strong> all N candidates have the same similarity. Their softmax probabilities are 1/N, so L = log N. With two candidates, L = log 2 ≈ 0.693; with four, L = log 4 ≈ 1.386.</p><p>With N = 2, L = log(1 + exp(s<sub>−</sub> − s<sub>+</sub>)), the logistic / softplus form in Eq. 16.14. It is smooth and remains positive for finite scores. Contrast this with the similarity hinge max(0, s<sub>−</sub> − s<sub>+</sub> + 1) in Eq. 16.15, which has a flat zero region. Do not transfer a numerical margin unchanged between cosine and squared-distance forms.</p><p>The book connects N-pairs to InfoNCE and describes NT-Xent as a temperature-scaled form. With temperature τ, similarities enter as s/τ. Lower τ sharpens the softmax; τ = 1 gives the formula above. These candidate probabilities are not automatically calibrated probabilities that two inputs represent the same identity.</p><p class="source">§16.2.4.3 · p. 556 · PDF p. 586 · Eqs. 16.12–16.15</p></article>
+<article class="card wide"><p class="eyebrow">Compare the objectives</p><h3>Keep the geometry and the supervision separate.</h3><div class="table-wrap" tabindex="0" role="region" aria-label="Loss comparison table; scroll horizontally on small screens"><table><thead><tr><th>Approach</th><th>Training signal</th><th>What it encourages</th><th>Zero loss?</th></tr></thead><tbody><tr><td>Classification features</td><td>Named class per input</td><td>Correct side of class boundaries</td><td>No direct distance constraint</td></tr><tr><td>Pairwise contrastive</td><td>Match / nonmatch pair</td><td>Positive r = 0; negative r ≥ m</td><td>Yes, if each constraint is met</td></tr><tr><td>Triplet</td><td>Anchor, positive, negative</td><td>q<sub>an</sub> − q<sub>ap</sub> ≥ m</td><td>Yes, with enough relative separation</td></tr><tr><td>N-pairs</td><td>Positive vs. several negatives</td><td>Positive wins the candidate softmax</td><td>Strictly positive for finite scores with ≥1 negative</td></tr></tbody></table></div><p class="source">Synthesis of §§16.2.3–16.2.4 · pp. 554–556</p></article>
+<article class="card wide" id="checklist"><p class="eyebrow">Before the quiz</p><h3>Explain it without looking.</h3><ol class="reading-map"><li>Why can 1-NN memorize training data and still generalize poorly?</li><li>What does normalization change, and how do r, q, and cosine similarity relate?</li><li>Why are shared weights essential to the Siamese construction described here?</li><li>When does a negative pair stop paying loss? Does a positive pair have the same rule?</li><li>Can a triplet’s positive be closer than its negative and still have positive loss?</li><li>How can the same embedding support a newly added gallery class?</li><li>What changes when an anchor is compared with several negatives?</li></ol><p class="small muted">Use the Similarity lab to check each loss numerically, then try a focused Siamese or triplet quiz round.</p><p class="source">Reading map: §16.1 pp. 547–551; §§16.2.2–16.2.3 p. 554; §16.2.4 pp. 555–556. PDF page number = printed page + 30 in these sections.</p></article>
+</div></section>
+
+<section class="panel" id="lab-panel" role="tabpanel" aria-labelledby="lab-tab" hidden>
+<div class="section-top"><div><p class="eyebrow muted">Similarity lab</p><h2>Make the loss make sense.</h2><p class="muted lab-description">All five experiments are original teaching examples. They calculate the stated objectives directly. Moving vectors illustrates embedding geometry; it does not train a neural network.</p></div></div>
+<nav class="anchor-nav" aria-label="Lab experiments"><a href="#lab-knn">1 · Neighbors</a><a href="#lab-normalize">2 · Normalization</a><a href="#lab-pair">3 · Siamese</a><a href="#lab-triplet">4 · Triplets</a><a href="#lab-npairs">5 · N-pairs</a></nav>
+<div id="lab-knn"><p class="eyebrow">Experiment 1 · §16.1</p><h2>How many neighbors get a vote?</h2><p class="lab-description">A one-dimensional gallery has A at −3, −1, 1 and B at 0.5, 2, 3. Move the query and change K. Tied neighbor distances use gallery order; tied class votes remain a tie.</p><div class="lab-grid"><div class="card"><div class="field"><div class="value-row"><label for="knn-x">Query position x</label><output id="knn-x-out" for="knn-x"></output></div><input type="range" id="knn-x" min="-4" max="4" step="0.1" value="0"></div><div class="field"><label for="knn-k">Neighbor count K</label><select id="knn-k"><option>1</option><option>3</option><option selected>5</option><option>6</option></select></div><p class="small muted">Distance is |x − xᵢ|. Ringed examples are selected neighbors. The query is a cross, A uses squares, B uses circles.</p><div class="rule"></div><h3>How local is 10% of the volume?</h3><div class="field"><div class="value-row"><label for="cube-d">Dimension D</label><output id="cube-d-out" for="cube-d"></output></div><input type="range" id="cube-d" min="1" max="50" step="1" value="10"></div><div class="formula" id="cube-result" role="status"></div><p class="small muted">Uniform unit-cube model: sᴰ = 0.1. This is a volume calculation, not measured KNN accuracy.</p></div><div class="card"><svg id="knn-svg" class="chart-svg" viewBox="0 0 520 210" role="img" aria-label="One-dimensional gallery with selected nearest neighbors and a movable query"></svg><div class="metrics two"><div class="metric"><span>Vote fraction p(A | x)</span><b id="knn-a"></b></div><div class="metric"><span>Vote fraction p(B | x)</span><b id="knn-b"></b></div></div><p class="status" id="knn-result" aria-live="polite"></p><div class="calc" id="knn-neighbors"></div><p class="lab-insight small">KNN always finds a nearest example in a nonempty gallery. For open set recognition, a separate acceptance rule is needed before declaring it a match.</p></div></div></div>
+<div class="rule"></div>
+<div id="lab-normalize"><p class="eyebrow">Experiment 2 · §16.2.2</p><h2>Angle or magnitude?</h2><p class="lab-description">Fix a = (1, 0). The other raw embedding is b = ρ(cos φ, sin φ), with positive length ρ. Its normalized vector is ê<sub>b</sub> = (cos φ, sin φ).</p><div class="lab-grid"><div class="card"><div class="field"><div class="value-row"><label for="embed-angle">Angle φ</label><output id="embed-angle-out" for="embed-angle"></output></div><input id="embed-angle" type="range" min="0" max="180" value="60" step="1"></div><div class="field"><div class="value-row"><label for="embed-radius">Raw embedding length ρ</label><output id="embed-radius-out" for="embed-radius"></output></div><input id="embed-radius" type="range" min="0.2" max="3" value="2" step="0.1"></div><p class="note">Try changing only ρ. Raw distance changes, but normalized distance and cosine similarity stay fixed.</p><div class="formula">Raw distance² = 1 + ρ² − 2ρ cos φ<br>Normalized q = 2 − 2 cos φ<br>Normalized r = √q</div></div><div class="card"><svg id="embedding-svg" class="chart-svg" viewBox="0 0 520 410" role="img" aria-label="Unit circle showing the normalized anchor and comparison embedding"></svg><div class="metrics"><div class="metric"><span>Cosine s</span><b id="embed-s"></b></div><div class="metric"><span>Normalized q</span><b id="embed-q"></b></div><div class="metric"><span>Normalized r</span><b id="embed-r"></b></div></div><div class="calc" id="embed-detail" aria-live="polite"></div></div></div></div>
+<div class="rule"></div>
+<div id="lab-pair"><p class="eyebrow">Experiment 3 · §16.2.4.1</p><h2>Siamese pairs: pull or separate?</h2><p class="lab-description">Two uses of the same encoder produce two unit embeddings. Choose whether they should match; then adjust their Euclidean distance r and the negative-pair margin m. Plot shows both loss curves, with a marker on the selected one.</p><div class="lab-grid"><div class="card"><div class="field"><label for="pair-type">Relationship</label><select id="pair-type"><option value="positive">Positive · should match</option><option value="negative">Negative · should not match</option></select></div><div class="field"><div class="value-row"><label for="pair-r">Euclidean distance r</label><output id="pair-r-out" for="pair-r"></output></div><input id="pair-r" type="range" min="0" max="2" step="0.05" value="0.7"></div><div class="field"><div class="value-row"><label for="pair-m">Negative margin m</label><output id="pair-m-out" for="pair-m"></output></div><input id="pair-m" type="range" min="0.1" max="2" step="0.05" value="1"></div><div class="preset-row"><button class="btn" id="pair-pos">Positive example</button><button class="btn" id="pair-neg">Negative inside margin</button><button class="btn" id="pair-safe">Negative beyond margin</button></div><p class="small muted">For unit embeddings r ≤ 2. This margin uses r units. A margin above 2 could never be met by a negative pair in this normalized setting.</p></div><div class="card"><svg id="pair-svg" class="chart-svg" viewBox="0 0 520 360" role="img" aria-label="Positive quadratic contrastive loss and negative squared-hinge contrastive loss as functions of Euclidean distance"></svg><div class="legend"><span><i class="key"></i>Positive r²</span><span><i class="key b"></i>Negative [m − r]₊²</span></div><div class="metrics two"><div class="metric"><span>Selected pair loss</span><b id="pair-loss"></b></div><div class="metric"><span>∂L / ∂r</span><b id="pair-grad"></b></div></div><div class="calc" id="pair-calc"></div><p class="status" id="pair-insight" aria-live="polite"></p></div></div></div>
+<div class="rule"></div>
+<div id="lab-triplet"><p class="eyebrow">Experiment 4 · §16.2.4.2</p><h2>Closer is not always close enough.</h2><p class="lab-description">Fix the unit anchor at a = (1, 0). Put p and n on the unit circle using their angles. The positive is above the horizontal axis and the negative below it. Their squared distances to the anchor determine the loss.</p><div class="lab-grid"><div class="card"><div class="field"><div class="value-row"><label for="trip-p">Anchor–positive angle</label><output id="trip-p-out" for="trip-p"></output></div><input id="trip-p" type="range" min="0" max="180" step="1" value="40"></div><div class="field"><div class="value-row"><label for="trip-n">Anchor–negative angle</label><output id="trip-n-out" for="trip-n"></output></div><input id="trip-n" type="range" min="0" max="180" step="1" value="50"></div><div class="field"><div class="value-row"><label for="trip-m">Squared-distance margin m</label><output id="trip-m-out" for="trip-m"></output></div><input id="trip-m" type="range" min="0.1" max="4.5" step="0.1" value="0.5"></div><div class="preset-row"><button class="btn" id="trip-short">Right order, short margin</button><button class="btn" id="trip-satisfied">Satisfied margin</button><button class="btn" id="trip-wrong">Wrong order</button><button class="btn" id="trip-impossible">Impossible margin</button></div><p class="small muted">Angles are controls for the embedding outputs. Encoder training could change all three outputs at once. Line lengths show r; the loss uses squared lengths q.</p></div><div class="card"><svg id="trip-svg" class="chart-svg" viewBox="0 0 520 410" role="img" aria-label="Unit-circle triplet geometry with anchor, positive, negative and anchor distance segments"></svg><div class="legend"><span><i class="key"></i>p · positive square</span><span><i class="key b"></i>n · negative circle</span><span>a · anchor cross</span></div><div class="metrics"><div class="metric"><span>Squared q_ap</span><b id="trip-qp"></b></div><div class="metric"><span>Squared q_an</span><b id="trip-qn"></b></div><div class="metric"><span>Triplet loss</span><b id="trip-loss"></b></div></div><div class="calc" id="trip-calc"></div><p class="status" id="trip-insight" aria-live="polite"></p><p class="lab-detail" id="trip-cos"></p><p class="lab-insight small">Check the inequality, not just the picture: q_an ≥ q_ap + m. A zero-loss triplet need not have q_ap = 0.</p></div></div></div>
+<div class="rule"></div>
+<div id="lab-npairs"><p class="eyebrow">Experiment 5 · §16.2.4.3</p><h2>Let more negatives compete.</h2><p class="lab-description">One positive has cosine similarity s₊; every negative has the same cosine similarity s₋. This simplified setting makes the effect of candidate count easy to see.</p><div class="lab-grid"><div class="card"><div class="field"><div class="value-row"><label for="np-pos">Positive similarity s₊</label><output id="np-pos-out" for="np-pos"></output></div><input id="np-pos" type="range" min="-1" max="1" step="0.05" value="0.7"></div><div class="field"><div class="value-row"><label for="np-neg">Each negative similarity s₋</label><output id="np-neg-out" for="np-neg"></output></div><input id="np-neg" type="range" min="-1" max="1" step="0.05" value="0.2"></div><div class="field"><div class="value-row"><label for="np-count">Number of negatives</label><output id="np-count-out" for="np-count"></output></div><input id="np-count" type="range" min="1" max="15" step="1" value="3"></div><div class="field"><div class="value-row"><label for="np-temp">Temperature τ</label><output id="np-temp-out" for="np-temp"></output></div><input id="np-temp" type="range" min="0.1" max="2" step="0.1" value="1"></div><button class="btn" id="np-equal">Equal similarities · N = 4</button><p class="small muted">τ = 1 is the book’s unscaled N-pairs formula. Other values illustrate the temperature extension mentioned in this section.</p></div><div class="card"><p class="result-label">Positive candidate’s softmax share</p><p class="big-number" id="np-prob"></p><div class="track"><div class="fill" id="np-fill"></div></div><div class="metrics two"><div class="metric"><span>N-pairs loss</span><b id="np-loss"></b></div><div class="metric"><span>Total candidates N</span><b id="np-total"></b></div></div><div class="calc" id="np-calc"></div><p class="status" id="np-insight" aria-live="polite"></p><p class="lab-insight small">These probabilities compete over this candidate set. Adding negatives changes the denominator. They are not a verification threshold or a calibrated probability of identity.</p></div></div></div>
+</section>
+<section class="panel" id="quiz-panel" role="tabpanel" aria-labelledby="quiz-tab" hidden><div class="quiz-shell">
+<div id="quiz-start"><p class="eyebrow muted">Learning quiz</p><h2>Practice, explain, repeat.</h2><p class="quiz-intro muted">Thirty questions cover concepts, calculations, and model choices. Each answer reveals an explanation and a textbook reference. Hints are available before answering.</p><div class="card"><h3>Set your focus</h3><div class="quiz-config"><div class="field"><label for="quiz-focus">Question set</label><select id="quiz-focus"><option value="all">All assigned material · 30 questions</option><option value="knn">KNN &amp; open world · 6 questions</option><option value="embedding">Embeddings &amp; classification · 6 questions</option><option value="pair">Siamese &amp; contrastive loss · 7 questions</option><option value="triplet">Triplet networks · 7 questions</option><option value="npairs">N-pairs loss · 4 questions</option></select></div><button class="btn primary" id="start-quiz">Start learning quiz</button></div><p class="small muted">First answers determine your score. Explanations stay available in the final review, and missed questions can be retried. Progress lasts for this open page session.</p></div><div class="note"><p class="small">Suggested routine: read the review, experiment in the lab, then answer without looking back. A missed question is a cue for what to study next.</p></div></div>
+<div id="quiz-active" hidden><div class="quiz-status"><span id="question-count"></span><span id="quiz-score"></span></div><div class="quiz-progress" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0" id="question-progress"><div id="question-progress-fill"></div></div><div class="card"><span class="tag" id="question-section"></span><h2 class="question" id="question-text" tabindex="-1"></h2><div class="options" id="question-options" role="group" aria-labelledby="question-text"></div><div class="hint" id="question-hint" hidden></div><div class="feedback" id="question-feedback" role="status" aria-live="polite" hidden></div><div class="quiz-actions"><button class="btn quiet" id="show-hint">Show hint</button><button class="btn primary" id="next-question" disabled>Next question →</button></div></div></div>
+<div id="quiz-results" hidden aria-live="polite"></div>
+</div></section></main><footer class="wrap"><div class="footer"><p><strong>Source:</strong> Kevin P. Murphy, <cite>Probabilistic Machine Learning: An Introduction</cite>, online version April 18, 2025. §16.1: printed pp. 547–551 (PDF pp. 577–581); §§16.2.2–16.2.4: printed pp. 554–556 (PDF pp. 584–586).</p><p>Original notes, diagrams, practice examples, and quiz questions. Self-contained and usable offline. Quiz progress lasts for this open page session. Print review prints the notes regardless of the selected tab.</p></div></footer>
+<script type="application/json" id="quiz-data">[
+ {
+  "group": "knn",
+  "section": "16.1",
+  "page": "547",
+  "topic": "Neighbor votes",
+  "q": "The five nearest labels are [A, B, A, A, B]. What is the KNN estimate p(A | x)?",
+  "a": [
+   "1/2.",
+   "3/5.",
+   "2/5.",
+   "1, because A wins."
+  ],
+  "correct": 1,
+  "hint": "Count A labels, then divide by K.",
+  "why": "Three of five neighbors have label A, so p(A | x)=3/5. The majority class and its estimated probability are different outputs."
+ },
+ {
+  "group": "knn",
+  "section": "16.1.1",
+  "page": "548–549",
+  "topic": "Training vs. testing",
+  "q": "A 1-NN classifier gets zero training error when each distinct training point is its own neighbor. What follows?",
+  "a": [
+   "Test error must also be zero.",
+   "Its distances must be learned.",
+   "It may still overfit and generalize poorly.",
+   "Larger K must improve every test prediction."
+  ],
+  "correct": 2,
+  "hint": "What happens when the stored labels contain noise?",
+  "why": "Memorizing training points does not establish generalization. Small K can produce sensitive boundaries; larger K smooths them and may eventually underfit. Validation helps choose K."
+ },
+ {
+  "group": "knn",
+  "section": "16.1.2",
+  "page": "548–550",
+  "topic": "Dimensionality",
+  "q": "For uniform data in a 10D unit cube, what cube side length covers 10% of the volume?",
+  "a": [
+   "0.1.",
+   "0.01.",
+   "10.",
+   "About 0.794."
+  ],
+  "correct": 3,
+  "hint": "Solve s^10=0.1.",
+  "why": "s=0.1^(1/10)≈0.794. Even a neighborhood with only 10% of the volume spans much of each coordinate range, so nearest neighbors need not be local."
+ },
+ {
+  "group": "knn",
+  "section": "16.1.3",
+  "page": "550",
+  "topic": "Search and storage",
+  "q": "Which description of ordinary KNN is accurate?",
+  "a": [
+   "It retains training examples; brute-force queries scan the gallery, while approximate search can trade exactness for speed.",
+   "It discards every example after fitting a fixed class-weight matrix.",
+   "Every query takes constant time regardless of gallery size.",
+   "Higher dimensions guarantee more efficient exact search."
+  ],
+  "correct": 0,
+  "hint": "Separate storing examples from finding the nearest examples.",
+  "why": "KNN is an exemplar method. Storage grows with the retained gallery. A brute-force query compares with all stored examples. Pruning, indexing, and approximate search address different storage or runtime costs."
+ },
+ {
+  "group": "knn",
+  "section": "16.1.4.1",
+  "page": "550–551",
+  "topic": "Open world",
+  "q": "A new person is absent from a face gallery. Why is always returning the nearest identity inadequate?",
+  "a": [
+   "A nearest neighbor never exists.",
+   "The person must be an OOD dog image.",
+   "There is always a nearest gallery example, but it may not be a valid match.",
+   "A new person has no embedding."
+  ],
+  "correct": 2,
+  "hint": "Nearest is a relative comparison; matching also needs an acceptance rule.",
+  "why": "Open set recognition needs the option to reject known labels. A novel person is a new class; an unrelated dog image is the book’s OOD example. Rejection alone does not distinguish these causes."
+ },
+ {
+  "group": "knn",
+  "section": "16.1.4",
+  "page": "550–551",
+  "topic": "New classes and matching",
+  "q": "Which use of a learned embedding fits the open world discussion?",
+  "a": [
+   "A new gallery identity always requires rebuilding the encoder output layer.",
+   "After obtaining a label, add a new person’s examples to the gallery and reuse the similarity function.",
+   "Entity resolution cannot use similarity.",
+   "A single example guarantees accurate recognition of every future pose."
+  ],
+  "correct": 1,
+  "hint": "What part stores identities, and what part maps inputs to vectors?",
+  "why": "A reusable embedding and gallery can support new classes with few examples. Success still depends on representation quality and representative examples. Entity resolution and tracking are other matching problems described in this section."
+ },
+ {
+  "group": "embedding",
+  "section": "16.2.2",
+  "page": "554",
+  "topic": "Normalization",
+  "q": "For a nonzero embedding e, what does ê=e/‖e‖₂ guarantee?",
+  "a": [
+   "All its coordinates are positive.",
+   "Its dimension equals the number of classes.",
+   "It has unit length.",
+   "It is orthogonal to every other embedding."
+  ],
+  "correct": 2,
+  "hint": "Compute the norm after dividing by the norm.",
+  "why": "The normalized embedding has length 1 and lies on the unit hypersphere. Its coordinates can be negative. A zero embedding needs explicit handling; dividing by zero is undefined."
+ },
+ {
+  "group": "embedding",
+  "section": "16.2.2",
+  "page": "554",
+  "topic": "Cosine and squared distance",
+  "q": "Two unit embeddings have cosine similarity s=0.8. What is q=‖êᵢ−êⱼ‖²?",
+  "a": [
+   "0.4.",
+   "0.2.",
+   "1.6.",
+   "0.16."
+  ],
+  "correct": 0,
+  "hint": "Use q=2−2s.",
+  "why": "q=2−2(0.8)=0.4. Euclidean distance r is √0.4≈0.632. Squared distance and Euclidean distance must not be substituted for each other inside a loss without adjusting the formula."
+ },
+ {
+  "group": "embedding",
+  "section": "16.2.2",
+  "page": "554",
+  "topic": "Ranking direction",
+  "q": "For unit-normalized embeddings, which nearest-neighbor ranking is equivalent to largest cosine similarity?",
+  "a": [
+   "Largest squared Euclidean distance.",
+   "Smallest squared Euclidean distance.",
+   "Largest raw embedding norm.",
+   "Smallest class index."
+  ],
+  "correct": 1,
+  "hint": "q=2−2s is decreasing in s.",
+  "why": "For unit vectors, maximizing s minimizes q=2−2s and also minimizes r=√q. Without normalization, cosine and ordinary Euclidean distance need not give the same ranking."
+ },
+ {
+  "group": "embedding",
+  "section": "16.2.2",
+  "page": "554",
+  "topic": "Geometry bounds",
+  "q": "For unit embeddings, what ranges are valid?",
+  "a": [
+   "s in [0,1], q in [0,1].",
+   "s in [−1,1], r in [0,4], q in [0,2].",
+   "s is unbounded.",
+   "s in [−1,1], r in [0,2], q in [0,4]."
+  ],
+  "correct": 3,
+  "hint": "Opposite unit vectors are two units apart.",
+  "why": "The dot product of unit vectors lies between −1 and 1. Thus q=2−2s lies between 0 and 4, while r=√q lies between 0 and 2."
+ },
+ {
+  "group": "embedding",
+  "section": "16.2.3",
+  "page": "554",
+  "topic": "Classification features",
+  "q": "Why can a classifier’s hidden layer be a useful but imperfect metric embedding?",
+  "a": [
+   "A class loss never trains hidden features.",
+   "Correct class decisions do not directly require within-class compactness or between-class distance margins.",
+   "The penultimate layer must be one-dimensional.",
+   "Its geometry is always identical to a triplet-trained embedding."
+  ],
+  "correct": 1,
+  "hint": "Think of two far-apart points on the same side of a boundary.",
+  "why": "Classification trains decision correctness. It can learn useful features, but the objective does not directly impose the pair or triplet relationships that metric losses impose. The book commonly reuses the penultimate layer."
+ },
+ {
+  "group": "embedding",
+  "section": "16.2.2–16.2.4",
+  "page": "554–555",
+  "topic": "Similarity supervision",
+  "q": "Must metric-learning pairs always come from named class labels?",
+  "a": [
+   "Yes; every identity must be named.",
+   "Yes; a loss cannot compare examples.",
+   "No; another justified source of match/nonmatch relationships can provide supervision.",
+   "No; no information about similarity is ever needed."
+  ],
+  "correct": 2,
+  "hint": "Class equality is one way to define similarity, not the only way.",
+  "why": "Pair relationships can exist without named classes. Some methods construct relationships through self-supervision. The objective still needs a meaningful definition of which examples should be similar or dissimilar."
+ },
+ {
+  "group": "pair",
+  "section": "16.2.4.1",
+  "page": "555",
+  "topic": "Shared weights",
+  "q": "What makes the two branches Siamese in this section?",
+  "a": [
+   "They are independently trained classifiers with the same layer count.",
+   "They apply one feature extractor with the same parameters θ to both inputs.",
+   "One always sees positives and the other always sees negatives.",
+   "They must produce different embedding dimensions."
+  ],
+  "correct": 1,
+  "hint": "Identical architecture is weaker than shared parameters.",
+  "why": "Both branches evaluate f(·;θ). Their parameters are tied, so the outputs are comparable representations from the same function. Independent copies can diverge even if they start with equal weights."
+ },
+ {
+  "group": "pair",
+  "section": "16.2.4.1",
+  "page": "555",
+  "topic": "Positive pair calculation",
+  "q": "Using L=t r²+(1−t)max(0,m−r)², what is the loss for a positive pair with r=0.7 and m=1?",
+  "a": [
+   "0.09.",
+   "0.7.",
+   "0.49.",
+   "0."
+  ],
+  "correct": 2,
+  "hint": "A positive pair has t=1.",
+  "why": "The positive term is r²=0.7²=0.49. The margin gates only the negative term in this objective, so it does not make this positive pair free of loss."
+ },
+ {
+  "group": "pair",
+  "section": "16.2.4.1",
+  "page": "555",
+  "topic": "Negative pair calculation",
+  "q": "A negative pair has Euclidean distance r=0.7 and margin m=1. What is its contrastive loss?",
+  "a": [
+   "0.09.",
+   "0.49.",
+   "0.3.",
+   "1.7."
+  ],
+  "correct": 0,
+  "hint": "Square the positive part of m−r.",
+  "why": "L=max(0,1−0.7)²=0.3²=0.09. Do not square r first and then subtract it from m; the chosen margin here is in Euclidean-distance units."
+ },
+ {
+  "group": "pair",
+  "section": "16.2.4.1",
+  "page": "555",
+  "topic": "Negative saturation",
+  "q": "A negative pair has r=1.2 with m=1. What does its contrastive term encourage?",
+  "a": [
+   "Push it farther forever.",
+   "Pull it down to exactly 1.",
+   "Change its class label.",
+   "Nothing from this pair: its loss and distance derivative are zero."
+  ],
+  "correct": 3,
+  "hint": "Evaluate max(0,m−r).",
+  "why": "The hinge is inactive once r≥m. The term does not pull a safely separated negative back to the margin, nor reward endless separation. Other pairs can still change the encoder."
+ },
+ {
+  "group": "pair",
+  "section": "16.2.4.1",
+  "page": "555",
+  "topic": "Collapse",
+  "q": "Why is training only on positive-pair distances risky?",
+  "a": [
+   "A constant embedding puts every positive pair at distance zero.",
+   "Positive pairs force all embeddings to infinity.",
+   "Shared weights cannot process positives.",
+   "Normalization makes all pairwise distances different."
+  ],
+  "correct": 0,
+  "hint": "Imagine assigning the same vector to every input.",
+  "why": "A constant embedding minimizes all positive-only r² terms but destroys discrimination. Negative pairs penalize collapse because their loss at r=0 is m². This penalty is not a guarantee of successful optimization."
+ },
+ {
+  "group": "pair",
+  "section": "16.2.4.1",
+  "page": "555",
+  "topic": "Gradient accumulation",
+  "q": "During Siamese training, where do the two encoder branches’ gradient contributions go?",
+  "a": [
+   "Only the first branch receives gradients.",
+   "They are added into the same shared parameter set via backpropagation.",
+   "They train unrelated copies that never interact.",
+   "They change the labels instead of θ."
+  ],
+  "correct": 1,
+  "hint": "Both evaluations depend on the same θ.",
+  "why": "The loss depends on θ through both branch outputs. The chain rule sums both contributions when differentiating with respect to that shared θ. Sharing is a constraint throughout training, not merely an initialization choice."
+ },
+ {
+  "group": "pair",
+  "section": "16.1.4 & 16.2.4.1",
+  "page": "550–551, 555",
+  "topic": "Training vs. verification",
+  "q": "Does the contrastive training margin m automatically define the best acceptance threshold for face verification?",
+  "a": [
+   "Yes, by definition.",
+   "Yes, for every new dataset and cost setting.",
+   "No; an acceptance threshold is a separate decision rule to evaluate for the application.",
+   "No threshold can ever use embedding distance."
+  ],
+  "correct": 2,
+  "hint": "Training an embedding and making an acceptance decision are separate steps.",
+  "why": "The loss margin shapes the geometry. A verification threshold governs acceptance and rejection and should be chosen using appropriate validation data and error tradeoffs. The two values need not coincide."
+ },
+ {
+  "group": "triplet",
+  "section": "16.2.4.2",
+  "page": "555–556",
+  "topic": "Triplet roles",
+  "q": "In the triplet loss, which distances are compared?",
+  "a": [
+   "Anchor–positive and anchor–negative, using a shared encoder for all three inputs.",
+   "Only positive–negative.",
+   "Anchor–anchor and negative–negative.",
+   "Three independently trained class probabilities."
+  ],
+  "correct": 0,
+  "hint": "The anchor is the common reference.",
+  "why": "The standard triplet expression compares q_ap and q_an. It does not directly include q_pn. All three inputs are embedded by the same learned function."
+ },
+ {
+  "group": "triplet",
+  "section": "16.2.4.2",
+  "page": "555–556",
+  "topic": "Margin calculation",
+  "q": "q_ap=0.4, q_an=0.6, m=0.5. What is L=max(0,q_ap−q_an+m)?",
+  "a": [
+   "0, because the positive is closer.",
+   "0.3.",
+   "0.7.",
+   "1.5."
+  ],
+  "correct": 1,
+  "hint": "The distance gap is only 0.2; compare it with 0.5.",
+  "why": "L=max(0,0.4−0.6+0.5)=0.3. Correct ranking is insufficient: q_an must be at least 0.9 to satisfy this margin with q_ap fixed."
+ },
+ {
+  "group": "triplet",
+  "section": "16.2.4.2",
+  "page": "555–556",
+  "topic": "Zero-loss condition",
+  "q": "Which condition exactly gives zero triplet hinge loss?",
+  "a": [
+   "q_ap=q_an regardless of m.",
+   "q_ap≥q_an+m.",
+   "q_an≥q_ap+m.",
+   "q_ap must be zero."
+  ],
+  "correct": 2,
+  "hint": "Rearrange q_ap−q_an+m≤0.",
+  "why": "The negative squared distance must exceed or equal the positive squared distance plus the margin. A nonzero positive distance can satisfy this condition."
+ },
+ {
+  "group": "triplet",
+  "section": "16.2.4.2",
+  "page": "555–556",
+  "topic": "Relative vs. absolute",
+  "q": "q_ap=1, q_an=2, m=0.5 gives zero triplet loss. What does this demonstrate?",
+  "a": [
+   "All positive pairs have collapsed.",
+   "The positive must have cosine 1.",
+   "No encoder parameters are shared.",
+   "Triplet loss enforces relative separation, so zero loss does not require q_ap=0."
+  ],
+  "correct": 3,
+  "hint": "Substitute into the hinge.",
+  "why": "L=max(0,1−2+0.5)=0. The positive remains one squared-distance unit from the anchor, but the negative is sufficiently farther away."
+ },
+ {
+  "group": "triplet",
+  "section": "16.2.2 & 16.2.4.2",
+  "page": "554–556",
+  "topic": "Cosine margin conversion",
+  "q": "For unit embeddings and squared-distance margin m=0.5, what cosine gap gives zero triplet loss?",
+  "a": [
+   "s_ap−s_an≥0.25.",
+   "s_an−s_ap≥0.5.",
+   "s_ap−s_an≥1.",
+   "No cosine relation exists."
+  ],
+  "correct": 0,
+  "hint": "Substitute q=2−2s and divide the resulting inequality by 2.",
+  "why": "q_an−q_ap=2(s_ap−s_an). Thus q_an−q_ap≥0.5 is equivalent to s_ap−s_an≥0.25. Margins cannot be copied unchanged between the two forms."
+ },
+ {
+  "group": "triplet",
+  "section": "16.2.2 & 16.2.4.2",
+  "page": "554–556",
+  "topic": "Feasible margins",
+  "q": "With unit embeddings, can a squared-distance triplet margin m=4.5 ever have zero loss?",
+  "a": [
+   "Yes, by scaling the normalized embeddings.",
+   "No; q_an−q_ap is at most 4.",
+   "Yes, if q_ap=q_an.",
+   "Yes, because cosine is unbounded."
+  ],
+  "correct": 1,
+  "hint": "q_an≤4 and q_ap≥0.",
+  "why": "The largest possible squared-distance gap is 4. A margin of 4.5 is impossible under unit normalization, even for one ideal triplet. Dataset constraints may make smaller margins infeasible as well."
+ },
+ {
+  "group": "triplet",
+  "section": "16.2.4.2",
+  "page": "556",
+  "topic": "Triplet enumeration",
+  "q": "Why does naively using every possible triplet scale cubically with dataset size?",
+  "a": [
+   "Every vector has three coordinates.",
+   "Every network needs three independent encoders.",
+   "Anchor, positive, and negative choices can each scale with N; minibatches use selected comparisons instead.",
+   "A triplet loss always has three nonzero terms."
+  ],
+  "correct": 2,
+  "hint": "Count combinations of three example roles.",
+  "why": "A naive enumeration considers O(N³) candidate triples. Minibatches contain usable positives and negatives for anchors. The detailed mining methods of §16.2.5 are outside this guide."
+ },
+ {
+  "group": "npairs",
+  "section": "16.2.4.3",
+  "page": "556",
+  "topic": "Multiple negatives",
+  "q": "What changes when moving from one triplet comparison to N-pairs loss?",
+  "a": [
+   "The positive is no longer needed.",
+   "The encoder stops sharing weights.",
+   "Distances must become unnormalized.",
+   "One anchor’s positive competes with N−1 negatives through a softmax-style objective."
+  ],
+  "correct": 3,
+  "hint": "Look at the denominator containing multiple negative scores.",
+  "why": "N-pairs provides simultaneous comparison against several negatives. It treats the positive candidate as the target in a candidate-classification loss."
+ },
+ {
+  "group": "npairs",
+  "section": "16.2.4.3",
+  "page": "556",
+  "topic": "Equal similarities",
+  "q": "One positive and three negatives have equal similarities. At τ=1, what is the N-pairs loss?",
+  "a": [
+   "log 4≈1.386.",
+   "0.",
+   "log 3≈1.099.",
+   "4."
+  ],
+  "correct": 0,
+  "hint": "There are four equally likely candidates.",
+  "why": "The positive softmax share is 1/4. Its negative log probability is −log(1/4)=log 4. N counts all candidates, including the positive."
+ },
+ {
+  "group": "npairs",
+  "section": "16.2.4.3",
+  "page": "556",
+  "topic": "Softplus vs. hinge",
+  "q": "With one negative, what is true of N-pairs L=log(1+exp(s_−−s_+))?",
+  "a": [
+   "It has exactly the same flat zero region as a triplet hinge.",
+   "It is smooth and positive for finite scores, unlike a hinge with a zero-loss region.",
+   "It ignores the positive similarity.",
+   "It becomes negative whenever the positive wins."
+  ],
+  "correct": 1,
+  "hint": "The logarithm’s argument is always greater than 1 for finite scores.",
+  "why": "The logistic/softplus form smoothly rewards a larger positive-minus-negative gap. It approaches zero in an unbounded favorable-score limit but is strictly positive at finite scores. Unit cosine scores are bounded."
+ },
+ {
+  "group": "npairs",
+  "section": "16.2.4.3",
+  "page": "556",
+  "topic": "Temperature",
+  "q": "In a temperature-scaled candidate softmax, what does lowering positive τ do?",
+  "a": [
+   "It changes which embedding is the anchor.",
+   "It normalizes every raw vector to zero.",
+   "It divides similarities by a smaller number, sharpening the candidate distribution.",
+   "It guarantees calibrated identity probabilities."
+  ],
+  "correct": 2,
+  "hint": "The logits are s/τ.",
+  "why": "Smaller positive temperature magnifies score differences. It favors the positive more strongly if it has the highest score, but it can emphasize a wrong winner too. Candidate shares are not automatically identity probabilities."
+ }
+]</script>
+<script>
+
+(() => {
+'use strict';
+const $=id=>document.getElementById(id), tabs=[...document.querySelectorAll('[role="tab"]')];
+function selectTab(tab){tabs.forEach(t=>{const active=t===tab;t.setAttribute('aria-selected',String(active));t.tabIndex=active?0:-1;$(t.getAttribute('aria-controls')).hidden=!active;});}
+tabs.forEach((tab,index)=>{tab.addEventListener('click',()=>selectTab(tab));tab.addEventListener('keydown',e=>{let next;if(e.key==='ArrowRight')next=(index+1)%tabs.length;if(e.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;if(e.key==='Home')next=0;if(e.key==='End')next=tabs.length-1;if(next!==undefined){e.preventDefault();selectTab(tabs[next]);tabs[next].focus();}});});
+$('print-review').addEventListener('click',()=>window.print());
+const val=id=>Number($(id).value),fmt=(n,k=3)=>(Math.abs(n)<1e-10?0:n).toFixed(k),rad=d=>d*Math.PI/180;
+function listen(ids,fn){ids.forEach(id=>$(id).addEventListener('input',fn));fn();}
+function preset(id,values,fn){$(id).addEventListener('click',()=>{Object.entries(values).forEach(([key,v])=>$(key).value=v);fn();});}
+const green='#176b58',gold='#a07b2b',ink='#172f30',line='#d6dfd8';
+function textSVG(x,y,s,extra=''){return `<text x="${x}" y="${y}" fill="${ink}" font-size="24" ${extra}>${s}</text>`;}
+function dot(x,y,color,shape='circle'){return shape==='square'?`<rect x="${x-7}" y="${y-7}" width="14" height="14" fill="${color}"/>`:`<circle cx="${x}" cy="${y}" r="8" fill="${color}"/>`;}
+function cross(x,y){return `<path d="M${x-8},${y-8}L${x+8},${y+8}M${x-8},${y+8}L${x+8},${y-8}" stroke="${ink}" stroke-width="4"/>`;}
+function circleBase(){return `<path d="M65,205H455M260,25V385" stroke="${line}"/><circle cx="260" cy="205" r="140" fill="none" stroke="${line}" stroke-width="2"/>${textSVG(266,232,'0')}`;}
+function point(angle){return [260+140*Math.cos(rad(angle)),205-140*Math.sin(rad(angle))];}
+function updateKNN(){const x=val('knn-x'),k=val('knn-k');$('knn-x-out').textContent=fmt(x,1);const gallery=[{x:-3,c:'A'},{x:-1,c:'A'},{x:1,c:'A'},{x:.5,c:'B'},{x:2,c:'B'},{x:3,c:'B'}];const neighbors=gallery.map((p,i)=>({...p,i,d:Math.abs(p.x-x)})).sort((a,b)=>a.d-b.d||a.i-b.i).slice(0,k),selected=new Set(neighbors.map(p=>p.i)),a=neighbors.filter(p=>p.c==='A').length,b=k-a;
+$('knn-a').textContent=fmt(a/k);$('knn-b').textContent=fmt(b/k);$('knn-result').textContent=`${a} A vote${a===1?'':'s'}, ${b} B vote${b===1?'':'s'} → ${a===b?'tied class vote':`predict ${a>b?'A':'B'}`}.`;
+$('knn-neighbors').textContent='Nearest first: '+neighbors.map(p=>`${p.c} at ${p.x} (distance ${fmt(p.d,1)})`).join('; ')+'.';
+let svg=`<path d="M40,90H480" stroke="${line}" stroke-width="2"/>`;for(const t of [-4,0,4]){const px=40+(t+4)*55;svg+=`<path d="M${px},85V95" stroke="${line}"/>`+textSVG(px,185,t,'text-anchor="middle"');}
+gallery.forEach((p,i)=>{const px=40+(p.x+4)*55;svg+=selected.has(i)?`<circle cx="${px}" cy="90" r="17" stroke="${ink}" stroke-width="2" fill="none"/>`:'';svg+=dot(px,90,p.c==='A'?green:gold,p.c==='A'?'square':'circle');svg+=textSVG(px,58,p.c,'text-anchor="middle"');});const qx=40+(x+4)*55;svg+=cross(qx,133)+textSVG(qx,160,'x','text-anchor="middle"');$('knn-svg').innerHTML=svg;
+const d=val('cube-d');$('cube-d-out').textContent=d;$('cube-result').textContent=`s = 0.1^(1/${d}) = ${fmt(.1**(1/d))}, or ${fmt(100*.1**(1/d),1)}% of the unit side length.`;
+}
+listen(['knn-x','knn-k','cube-d'],updateKNN);
+function updateEmbedding(){const angle=val('embed-angle'),rho=val('embed-radius'),s=Math.cos(rad(angle)),q=Math.max(0,2-2*s),r=Math.sqrt(q);$('embed-angle-out').textContent=angle+'°';$('embed-radius-out').textContent=fmt(rho,1);$('embed-s').textContent=fmt(s);$('embed-q').textContent=fmt(q);$('embed-r').textContent=fmt(r);$('embed-detail').textContent=`Raw b = (${fmt(rho*s)}, ${fmt(rho*Math.sin(rad(angle)))}). Raw distance² = ${fmt(1+rho*rho-2*rho*s)}. After normalization, b̂ = (${fmt(s)}, ${fmt(Math.sin(rad(angle)))}).`;
+const [bx,by]=point(angle);$('embedding-svg').innerHTML=circleBase()+`<path d="M260,205L400,205M260,205L${bx},${by}" stroke="${green}" stroke-width="3"/><path d="M400,205L${bx},${by}" stroke="${gold}" stroke-width="3" stroke-dasharray="7 5"/>`+cross(400,205)+dot(bx,by,green,'square')+textSVG(416,237,'a')+textSVG(bx-15,by-18,'b̂','text-anchor="end"')+textSVG(260,400,'Unit circle · dashed chord has length r','text-anchor="middle" font-size="18"');
+}
+listen(['embed-angle','embed-radius'],updateEmbedding);
+function updatePair(){const r=val('pair-r'),m=val('pair-m'),positive=$('pair-type').value==='positive',hinge=Math.max(0,m-r),loss=positive?r*r:hinge*hinge,grad=positive?2*r:-2*hinge;$('pair-r-out').textContent=fmt(r,2);$('pair-m-out').textContent=fmt(m,2);$('pair-loss').textContent=fmt(loss);$('pair-grad').textContent=fmt(grad);$('pair-calc').textContent=positive?`L = r² = ${fmt(r,2)}² = ${fmt(loss)}.`:`L = max(0, ${fmt(m,2)} − ${fmt(r,2)})² = ${fmt(loss)}.`;
+$('pair-insight').textContent=positive?(r<1e-9?'The positive pair coincides: loss and distance derivative are zero.':`The positive pair still pays r². Minimizing its loss favors reducing r. Changing m does not affect this term.`):(hinge>0?'Inside the safety margin: the negative distance derivative is negative, so minimizing this loss favors increasing r.':'At or beyond the margin: this negative pair contributes zero loss and no distance derivative.');
+const sx=x=>55+x*215,sy=y=>300-y*65;let svg=`<path d="M55,30V300H485" stroke="${line}" stroke-width="2"/>`+textSVG(55,24,'Loss')+textSVG(270,353,'Euclidean distance r','text-anchor="middle"');for(const x of [0,1,2])svg+=textSVG(sx(x),329,x,'text-anchor="middle"');for(const y of [0,2,4])svg+=textSVG(38,sy(y)+7,y,'text-anchor="end"');
+function curve(fn,color){let d='';for(let i=0;i<=100;i++){const x=i/50;d+=(i?'L':'M')+sx(x)+','+sy(fn(x));}return `<path d="${d}" fill="none" stroke="${color}" stroke-width="3"/>`;}
+svg+=curve(x=>x*x,green)+curve(x=>Math.max(0,m-x)**2,gold)+`<path d="M${sx(m)},30V300" stroke="${gold}" stroke-dasharray="5 5"/>`+dot(sx(r),sy(loss),ink)+textSVG(Math.min(455,Math.max(85,sx(m))),60,'m','text-anchor="middle"');$('pair-svg').innerHTML=svg;
+}
+listen(['pair-r','pair-m','pair-type'],updatePair);
+preset('pair-pos',{'pair-type':'positive','pair-r':.7,'pair-m':1},updatePair);preset('pair-neg',{'pair-type':'negative','pair-r':.7,'pair-m':1},updatePair);preset('pair-safe',{'pair-type':'negative','pair-r':1.2,'pair-m':1},updatePair);
+function updateTriplet(){const ap=val('trip-p'),an=val('trip-n'),m=val('trip-m'),sp=Math.cos(rad(ap)),sn=Math.cos(rad(an)),qp=Math.max(0,2-2*sp),qn=Math.max(0,2-2*sn),gap=qn-qp,loss=Math.max(0,m-gap);$('trip-p-out').textContent=ap+'°';$('trip-n-out').textContent=an+'°';$('trip-m-out').textContent=fmt(m,1);$('trip-qp').textContent=fmt(qp);$('trip-qn').textContent=fmt(qn);$('trip-loss').textContent=fmt(loss);$('trip-calc').textContent=`L = max(0, ${fmt(qp)} − ${fmt(qn)} + ${fmt(m,1)}) = ${fmt(loss)}. Gap q_an − q_ap = ${fmt(gap)}; required gap = ${fmt(m,1)}.`;
+let insight;if(m>4)insight='Impossible for unit embeddings: the largest squared-distance gap is 4, below this margin.';else if(qp+m>4+1e-9)insight='With this positive fixed, the required negative squared distance exceeds 4. Move the positive closer, reduce m, or both.';else if(loss<1e-9)insight='Margin satisfied: this triplet contributes zero hinge loss. The positive does not have to coincide with the anchor.';else if(gap< -1e-9)insight='Wrong order: the negative is closer than the positive. The active loss favors reducing q_ap and/or increasing q_an.';else if(Math.abs(gap)<1e-9)insight='Equal anchor distances: the loss is m. The positive needs a margin advantage.';else insight='Right order, insufficient margin: the positive is closer, but the gap is smaller than m. This triplet still pays loss.';
+$('trip-insight').textContent=insight;$('trip-cos').textContent=`Cosines: s_ap = ${fmt(sp)}, s_an = ${fmt(sn)}. Their gap ${fmt(sp-sn)} must be ≥ m/2 = ${fmt(m/2)}.`;
+const [px,py]=point(ap),[nx,ny]=point(-an);$('trip-svg').innerHTML=circleBase()+`<path d="M400,205L${px},${py}" stroke="${green}" stroke-width="3"/><path d="M400,205L${nx},${ny}" stroke="${gold}" stroke-width="3"/>`+dot(px,py,green,'square')+dot(nx,ny,gold)+cross(400,205)+textSVG(420,213,'a')+textSVG(px-16,py-18,'p','text-anchor="end"')+textSVG(nx-16,ny+30,'n','text-anchor="end"');
+}
+listen(['trip-p','trip-n','trip-m'],updateTriplet);
+preset('trip-short',{'trip-p':40,'trip-n':50,'trip-m':.5},updateTriplet);preset('trip-satisfied',{'trip-p':40,'trip-n':100,'trip-m':.5},updateTriplet);preset('trip-wrong',{'trip-p':90,'trip-n':30,'trip-m':.5},updateTriplet);preset('trip-impossible',{'trip-p':0,'trip-n':180,'trip-m':4.5},updateTriplet);
+function updateNPairs(){const sp=val('np-pos'),sn=val('np-neg'),count=val('np-count'),t=val('np-temp'),delta=(sn-sp)/t,logTerm=Math.log(count)+delta,loss=Math.max(0,logTerm)+Math.log1p(Math.exp(-Math.abs(logTerm))),prob=Math.exp(-loss);$('np-pos-out').textContent=fmt(sp,2);$('np-neg-out').textContent=fmt(sn,2);$('np-count-out').textContent=count;$('np-temp-out').textContent=fmt(t,1);$('np-prob').textContent=fmt(100*prob,2)+'%';$('np-fill').style.width=(100*prob)+'%';$('np-loss').textContent=fmt(loss);$('np-total').textContent=count+1;$('np-calc').textContent=`L = log[1 + ${count} × exp((${fmt(sn,2)} − ${fmt(sp,2)}) / ${fmt(t,1)})] = ${fmt(loss)}.`;
+$('np-insight').textContent=Math.abs(sp-sn)<1e-9?`All ${count+1} candidates tie: the positive share is 1/${count+1} and L = log(${count+1}), independent of temperature.`:sp>sn?'The positive has the highest individual score, but negatives still share the denominator. Add negatives to increase the loss; lower temperature to emphasize the positive’s score advantage.':'Negatives outscore the positive. Lowering temperature emphasizes their advantage and increases this loss.';
+}
+listen(['np-pos','np-neg','np-count','np-temp'],updateNPairs);preset('np-equal',{'np-pos':.5,'np-neg':.5,'np-count':3,'np-temp':1},updateNPairs);
+const questions=JSON.parse($('quiz-data').textContent);
+let deck=[],answers=[],position=0,answered=false;
+function startQuiz(pool){deck=pool.slice();answers=[];position=0;$('quiz-start').hidden=true;$('quiz-results').hidden=true;$('quiz-active').hidden=false;renderQuestion();$('question-text').focus();}
+function renderQuestion(){answered=false;const q=deck[position],correctSoFar=answers.filter(a=>a.correct).length;$('question-count').textContent='Question '+(position+1)+' of '+deck.length;$('quiz-score').textContent=correctSoFar+' correct / '+answers.length+' answered';$('question-section').textContent='§'+q.section+' · '+q.topic;$('question-text').textContent=q.q;$('question-hint').hidden=true;$('question-hint').textContent=q.hint;$('question-feedback').hidden=true;$('show-hint').hidden=false;$('show-hint').disabled=false;$('show-hint').textContent='Show hint';$('next-question').disabled=true;$('next-question').textContent=position===deck.length-1?'See results →':'Next question →';$('question-progress').setAttribute('aria-valuemax',deck.length);setProgress(answers.length);const options=$('question-options');options.replaceChildren();q.a.forEach((text,i)=>{const b=document.createElement('button');b.type='button';b.className='option';const letter=document.createElement('span');letter.className='letter';letter.textContent='ABCD'[i];letter.setAttribute('aria-hidden','true');const label=document.createElement('span');label.textContent=text;b.append(letter,label);b.addEventListener('click',()=>answerQuestion(i));options.append(b);});}
+function setProgress(n){$('question-progress').setAttribute('aria-valuenow',n);$('question-progress-fill').style.width=(100*n/deck.length)+'%';}
+function answerQuestion(selected){if(answered)return;answered=true;const q=deck[position],correct=selected===q.correct;answers.push({q,selected,correct});[...$('question-options').children].forEach((b,i)=>{b.disabled=true;if(i===q.correct||i===selected){b.classList.add(i===q.correct?'correct':'wrong');const status=document.createElement('span');status.className='option-state';status.textContent=i===q.correct?(i===selected?'Your answer · Correct':'Correct answer'):'Your answer · Incorrect';b.lastElementChild.append(status);}});const fb=$('question-feedback');fb.replaceChildren();fb.className='feedback'+(correct?'':' wrong');const title=document.createElement('strong');title.textContent=correct?'Correct. Here’s why.':'Not quite. Here’s the reasoning.';const explanation=document.createElement('p');explanation.textContent=q.why;const ref=document.createElement('p');ref.className='small muted';ref.textContent='Review §'+q.section+' · textbook p. '+q.page;fb.append(title,explanation,ref);fb.hidden=false;$('show-hint').hidden=true;$('next-question').disabled=false;setProgress(answers.length);$('quiz-score').textContent=answers.filter(a=>a.correct).length+' correct / '+answers.length+' answered';}
+$('start-quiz').addEventListener('click',()=>{const focus=$('quiz-focus').value;startQuiz(questions.filter(q=>focus==='all'||q.group===focus));});
+$('show-hint').addEventListener('click',()=>{$('question-hint').hidden=false;$('show-hint').disabled=true;$('show-hint').textContent='Hint shown';});
+$('next-question').addEventListener('click',()=>{if(!answered)return;if(position===deck.length-1)showResults();else{position++;renderQuestion();$('question-text').focus();}});
+function showResults(){
+ $('quiz-active').hidden=true;const container=$('quiz-results');container.replaceChildren();container.hidden=false;const correct=answers.filter(a=>a.correct).length,missed=answers.filter(a=>!a.correct).map(a=>a.q);
+ const intro=document.createElement('div');intro.className='card';const eyebrow=document.createElement('p');eyebrow.className='eyebrow muted';eyebrow.textContent='Practice complete';const heading=document.createElement('h2');heading.textContent=missed.length?'You have a focused review plan.':'All concepts answered correctly.';const score=document.createElement('p');score.className='score-number';score.textContent=correct+' / '+deck.length;const caption=document.createElement('p');caption.className='muted';caption.textContent=Math.round(100*correct/deck.length)+'% correct on first answers in this round.';intro.append(eyebrow,heading,score,caption);
+ const actions=document.createElement('div');actions.className='result-actions';if(missed.length){const retry=document.createElement('button');retry.className='btn primary';retry.textContent='Retry '+missed.length+' missed question'+(missed.length===1?'':'s');retry.addEventListener('click',()=>startQuiz(missed));actions.append(retry);}const again=document.createElement('button');again.className='btn'+(missed.length?'':' primary');again.textContent='Choose a new round';again.addEventListener('click',()=>{container.hidden=true;$('quiz-start').hidden=false;$('start-quiz').focus();});const review=document.createElement('button');review.className='btn quiet';review.textContent='Return to review';review.addEventListener('click',()=>{selectTab($('review-tab'));$('review-tab').focus();});actions.append(again,review);intro.append(actions);container.append(intro);
+ const title=document.createElement('h3');title.style.marginTop='32px';title.textContent='Your answers, with explanations';container.append(title);
+ answers.forEach((answer,i)=>{const item=document.createElement('div');item.className='review-item';const tag=document.createElement('p');tag.className='tag';tag.textContent=(answer.correct?'Correct':'Review this')+' · §'+answer.q.section+' · p. '+answer.q.page;const question=document.createElement('h3');question.textContent=(i+1)+'. '+answer.q.q;const yours=document.createElement('p');yours.className='small';yours.textContent='Your answer: '+answer.q.a[answer.selected];item.append(tag,question,yours);if(!answer.correct){const right=document.createElement('p');right.className='small';right.textContent='Correct answer: '+answer.q.a[answer.q.correct];item.append(right);}const explanation=document.createElement('p');explanation.className='small muted';explanation.textContent=answer.q.why;item.append(explanation);container.append(item);});
+ container.scrollIntoView({block:'start',behavior:'auto'});heading.tabIndex=-1;heading.focus();
+}
+
+})();
+</script></body></html>
