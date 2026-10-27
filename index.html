@@ -41,6 +41,40 @@
 
     .name { margin: 0; font-size: 1rem; font-weight: 720; letter-spacing: -0.015em; }
     .page-label { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    .header-nav { display: flex; align-items: center; gap: 20px; }
+    .reading-menu { position: relative; }
+    .reading-menu summary {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 680;
+      list-style: none;
+    }
+    .reading-menu summary::-webkit-details-marker { display: none; }
+    .reading-menu summary::after { content: '\2304'; }
+    .reading-menu[open] summary { border-color: var(--accent); }
+    .reading-menu[open] summary::after { content: '\2303'; }
+    .reading-menu-links {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 2;
+      width: 200px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 12px 32px rgba(22, 24, 29, 0.1);
+    }
+    .reading-menu-links a { display: block; padding: 12px; border-radius: 4px; color: var(--text); font-size: 0.9rem; text-decoration: none; }
+    .reading-menu-links a:hover, .reading-menu-links a:focus-visible { background: var(--background); color: var(--accent); }
 
     main {
       width: min(1120px, calc(100% - 40px));
@@ -125,6 +159,9 @@
 
     @media (max-width: 640px) {
       .site-header, main { width: min(100% - 28px, 1120px); }
+      .site-header { gap: 12px; }
+      .header-nav { gap: 10px; }
+      .page-label { display: none; }
       main { padding-top: 40px; }
       .resume-heading { align-items: start; flex-direction: column; }
       .actions { width: 100%; }
@@ -140,7 +177,15 @@
 <body>
   <header class="site-header">
     <p class="name">Charles Oliphant</p>
-    <p class="page-label">Resume</p>
+    <nav class="header-nav" aria-label="Site navigation">
+      <p class="page-label">Resume</p>
+      <details class="reading-menu">
+        <summary>Readings</summary>
+        <div class="reading-menu-links">
+          <a href="./cs473/">CS 473 readings</a>
+        </div>
+      </details>
+    </nav>
   </header>
 
   <main>
@@ -171,6 +216,18 @@
 
   <!-- Add the finished file at /resume.pdf. The viewer and buttons will appear automatically. -->
   <script>
+    const readingMenu = document.querySelector('.reading-menu');
+
+    document.addEventListener('click', (event) => {
+      if (!readingMenu.contains(event.target)) readingMenu.open = false;
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && readingMenu.open) {
+        readingMenu.open = false;
+        readingMenu.querySelector('summary').focus();
+      }
+    });
+
     const resumePath = './resume.pdf';
     const emptyState = document.getElementById('resume-empty');
     const viewer = document.getElementById('resume-viewer');

@@ -11,6 +11,7 @@ GitHub Pages serves this repository from the `main` branch. Each directory's
 
 - `/index.html` → <https://choliphant.github.io/>
 - `/cs472/index.html` → <https://choliphant.github.io/cs472/>
+- `/cs473/index.html` → <https://choliphant.github.io/cs473/>
 - `/cs472/readings/example/index.html` →
   `https://choliphant.github.io/cs472/readings/example/`
 
@@ -41,6 +42,15 @@ branch**, then select the `main` branch and `/ (root)` folder.
 
 Keeping each artifact in its own folder gives it a stable URL and prevents a
 new artifact from replacing the course or site home page.
+
+## Adding a CS 473 reading artifact
+
+1. Create a descriptive folder under `cs473/readings/` with an `index.html`
+   file and any local assets it needs.
+2. Add a link to it in `cs473/index.html`, keeping the list alphabetical.
+3. Preview the reading and course index locally, then publish the change.
+
+The homepage's **Readings** dropdown links to the CS 473 index.
 
 ## Publishing future changes
 
