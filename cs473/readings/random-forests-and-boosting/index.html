@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Offline CS473 companion to Murphy §§18.4 and 18.5.1–18.5.4, covering random forests, stagewise fitting, least-squares boosting, AdaBoost and LogitBoost."><title>CS473 · Random forests and boosting</title><style>
+
+:root{color-scheme:light;--bg:#f5f3ec;--paper:#fffef9;--ink:#172f30;--muted:#506260;--line:#d6dfd8;--accent:#176b58;--soft:#e7f0e7;--gold:#eed48b;--error:#9f342f;--error-bg:#fff0ec;--correct:#146346;--shadow:0 12px 40px #15352a08}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button,a,input,select,summary{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{cursor:default;opacity:.55}a{color:var(--accent);text-underline-offset:3px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #c27a10;outline-offset:4px}h1,h2,h3,p{margin-top:0}h1,h2,h3{line-height:1.2}h1{font-family:Georgia,serif;font-size:clamp(2.45rem,5.6vw,4.8rem);font-weight:400;letter-spacing:-.045em;max-width:850px;margin-bottom:22px}h2{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.8rem,3.3vw,2.7rem);letter-spacing:-.025em;margin-bottom:18px}h3{font-size:1.15rem;margin-bottom:13px}p{margin-bottom:16px}small,.small{font-size:.875rem}.muted{color:var(--muted)}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.76rem;font-weight:700}.wrap{max-width:1120px;margin:auto;padding:0 32px}.top{display:flex;justify-content:space-between;align-items:center;padding-top:24px;padding-bottom:24px;border-bottom:1px solid var(--line);gap:20px}.brand{font-weight:750;letter-spacing:-.02em}.brand span{font-weight:400;color:var(--muted)}.edition{font-size:.8rem;color:var(--muted)}.hero{padding-top:50px;padding-bottom:32px}.hero .eyebrow{color:var(--accent);margin-bottom:18px}.lead{font-size:1.1rem;max-width:690px;color:var(--muted)}.route{display:flex;gap:24px;flex-wrap:wrap;font-size:.85rem;margin-top:26px}.route span{display:flex;gap:9px;align-items:center}.route b{border:1px solid var(--line);border-radius:50%;width:25px;height:25px;display:inline-grid;place-items:center;font-weight:500}.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:6px}.tab{border:0;background:transparent;padding:16px 22px;color:var(--muted);font-weight:600;border-bottom:3px solid transparent}.tab[aria-selected=true]{border-bottom-color:var(--accent);color:var(--accent)}[hidden]{display:none!important}.panel{padding:34px 0 56px}.section-top{display:flex;justify-content:space-between;gap:18px;align-items:start;margin-bottom:20px}.section-top p{max-width:700px}.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:7px;padding:9px 16px;min-height:44px;font-size:.9rem;font-weight:600}.btn:hover:not(:disabled){border-color:var(--accent);background:var(--soft)}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.primary:hover:not(:disabled){background:#105441}.btn.quiet{background:transparent}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:26px;box-shadow:var(--shadow);min-width:0}.card .eyebrow{color:var(--accent);margin-bottom:12px}.wide{grid-column:1/-1}.anchor-nav{display:flex;flex-wrap:wrap;gap:8px 17px;font-size:.85rem;margin:0 0 28px}.rule{height:1px;background:var(--line);margin:32px 0}.formula{background:var(--soft);padding:15px 18px;border-radius:7px;font-family:Georgia,serif;font-size:1.08rem;line-height:1.8;overflow-wrap:anywhere;margin:15px 0}.formula small{font-family:system-ui,sans-serif;font-size:.8rem}.formula sub,.formula sup{font-size:.72em}.note{border-left:3px solid var(--accent);padding:2px 0 2px 16px;margin:18px 0}.note p:last-child{margin-bottom:0}ul,ol{padding-left:22px;margin-top:10px}li{padding-left:3px;margin-bottom:8px}.compact li{margin-bottom:5px}.source{font-size:.78rem;color:var(--muted);margin-top:18px;margin-bottom:0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{text-align:left;vertical-align:top;padding:13px 10px;border-bottom:1px solid var(--line)}th{font-weight:650;color:var(--accent)}td:first-child,th:first-child{padding-left:0}td:last-child,th:last-child{padding-right:0}.two-col{columns:2;column-gap:32px}.two-col li{break-inside:avoid}details{border-top:1px solid var(--line);padding:14px 0}details:last-child{padding-bottom:0}summary{cursor:pointer;font-weight:600}details p{margin:12px 0 0}.steps{counter-reset:step;list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.steps li{padding:0;position:relative}.steps b{display:block;margin-bottom:7px}.steps b:before{counter-increment:step;content:counter(step)" / ";color:var(--accent)}.lab-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:24px}.field{display:flex;flex-direction:column;gap:7px;margin-bottom:22px}.field label{font-size:.9rem;font-weight:600}select,input[type=number]{width:100%;border:1px solid #9bab9f;border-radius:6px;background:var(--paper);color:var(--ink);padding:10px;min-height:44px}input[type=range]{width:100%;accent-color:var(--accent)}.value-row{display:flex;justify-content:space-between;gap:15px}.value-row output{font-variant-numeric:tabular-nums}.prob-row{margin:22px 0}.prob-label{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px}.prob-label strong{font-size:1.5rem;line-height:1.3;font-weight:500;font-variant-numeric:tabular-nums}.track{height:13px;border-radius:4px;background:#e1e6dd;overflow:hidden}.fill{height:100%;background:var(--accent);transition:width .2s}.fill.alt{background:#a07b2b}.calc{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.85rem;overflow-wrap:anywhere;background:var(--bg);padding:14px;border-radius:7px;margin-top:18px}.result-label{font-size:.85rem;color:var(--muted)}.lab-insight{padding-top:18px;border-top:1px solid var(--line);margin-top:24px}.quiz-shell{max-width:820px;margin:auto}.quiz-intro{max-width:700px}.quiz-config{display:flex;gap:14px;align-items:end;flex-wrap:wrap;margin:24px 0}.quiz-config .field{margin:0;flex:1;min-width:180px}.quiz-status{display:flex;justify-content:space-between;gap:15px;align-items:center;font-size:.85rem;color:var(--muted);margin-bottom:10px}.quiz-progress{height:5px;background:var(--line);border-radius:5px;overflow:hidden;margin-bottom:28px}.quiz-progress div{height:100%;background:var(--accent);transition:width .2s}.question{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.3rem,3vw,1.7rem);line-height:1.4;margin:14px 0 22px}.options{display:grid;gap:12px}.option{display:flex;gap:13px;align-items:flex-start;min-height:54px;text-align:left;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:14px 17px;border-radius:8px;font-size:.95rem;line-height:1.5}.option .letter{display:grid;place-items:center;flex-shrink:0;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);font-size:.75rem}.option:hover:not(:disabled){border-color:var(--accent);background:var(--soft)}.option:disabled{opacity:1}.option.correct{border-color:var(--correct);background:#e8f3e9}.option.wrong{border-color:var(--error);background:var(--error-bg)}.option-state{display:block;font-weight:650;font-size:.8rem;margin-top:5px}.feedback{padding:20px;border-radius:8px;background:var(--soft);margin-top:20px}.feedback.wrong{background:var(--error-bg)}.feedback strong{display:block;margin-bottom:7px}.feedback p:last-child{margin-bottom:0}.quiz-actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:22px}.hint{font-size:.9rem;color:var(--muted);margin-top:17px;border-left:3px solid var(--gold);padding-left:14px}.score-number{font-family:Georgia,serif;font-size:3.3rem;line-height:1.1;margin:20px 0 8px}.result-actions{display:flex;gap:12px;flex-wrap:wrap;margin:23px 0}.review-item{padding:18px 0;border-top:1px solid var(--line)}.review-item p:last-child{margin-bottom:0}.tag{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.footer{border-top:1px solid var(--line);padding:24px 0 36px;font-size:.8rem;color:var(--muted)}.footer p{margin-bottom:7px}.mini-chart{display:flex;align-items:end;gap:18px;height:170px;padding-top:18px;margin:20px 0}.mini-bar-group{flex:1;height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;text-align:center;font-size:.85rem;gap:8px}.mini-bar{width:65%;max-width:100px;min-height:2px;background:var(--accent);border-radius:5px 5px 0 0}.big-number{font-family:Georgia,serif;font-size:2.4rem;line-height:1.1;margin:20px 0 8px}.checklist label{display:flex;gap:12px;align-items:start;margin:12px 0}.checklist input{margin-top:6px;accent-color:var(--accent);width:18px;height:18px;flex-shrink:0}.print-only{display:none}
+@media(max-width:760px){.wrap{padding-left:20px;padding-right:20px}.top{align-items:start}.edition{max-width:170px;text-align:right}.hero{padding-top:35px}.grid,.lab-grid{grid-template-columns:1fr}.wide{grid-column:auto}.steps{grid-template-columns:1fr}.two-col{columns:1}.section-top{display:block}.section-top .btn{margin-bottom:10px}.tab{padding:14px 16px}.card{padding:22px}.route{gap:14px}.quiz-status{align-items:start}.footer{overflow-wrap:anywhere}}
+@media(max-width:380px){.wrap{padding-left:14px;padding-right:14px}.tab{padding:14px 11px;font-size:.9rem}.card{padding:17px}.edition{font-size:.7rem}.option{padding:12px}.quiz-actions .btn{flex:1}.quiz-status{font-size:.78rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{body{background:white;color:black;font-size:10pt}.wrap{max-width:none;padding:0}.top,.hero .route,.tabs,.anchor-nav,.no-print,.footer{display:none!important}.hero{padding:0 0 15px}.hero h1{font-size:28pt}.hero .lead{font-size:11pt}.panel{padding:0}#review-panel{display:block!important}#lab-panel,#quiz-panel{display:none!important}.grid{display:block}.card{border:0;box-shadow:none;border-radius:0;padding:12px 0;break-inside:avoid}.formula{background:#f1f1ed}.print-only{display:block}.two-col{columns:1}.section-top{margin:0}.rule{margin:10px 0}details{display:none}h2{font-size:19pt}h3{font-size:13pt}a{color:black;text-decoration:none}.source{font-size:8pt}}
+
+.scope{font-size:.85rem;border-left:3px solid var(--gold);padding:6px 0 6px 15px;max-width:790px;margin-top:25px}.chart{width:100%;height:auto;display:block;touch-action:manipulation;background:#fffef9}.chart-frame{max-width:600px;margin:auto}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.85rem;margin-top:12px}.legend span{display:flex;align-items:center;gap:7px}.key{width:12px;height:12px;display:inline-block;background:#176b58}.key.b{background:#a07b2b;border-radius:50%}.matrix{font-family:ui-monospace,monospace;white-space:pre;font-size:.82rem;line-height:1.7;overflow-x:auto}.lab-detail{font-size:.85rem;margin-top:12px}.mini-label{font-size:.8rem;color:var(--muted)}.lab-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}.field-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}.checklist input{min-width:18px}.model-summary{font-size:.85rem;margin:12px 0 0}canvas:focus-visible{outline:3px solid #c27a10;outline-offset:3px}.quiz-shell:focus{outline:none}@media(max-width:760px){.lab-grid{grid-template-columns:1fr}.field-pair{grid-template-columns:1fr 1fr}}@media(max-width:380px){.field-pair{grid-template-columns:1fr}.tabs{gap:0}.tab{padding-left:9px;padding-right:9px}}
+@media(max-width:760px){.tabs{gap:0}.tab{padding:14px 8px;font-size:.9rem;white-space:nowrap;flex:1}}
+
+.flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.3fr) auto minmax(0,1fr);gap:10px;align-items:center;margin:12px 0}.node{background:var(--soft);padding:13px;border:1px solid var(--line);border-radius:8px;text-align:center;font-size:.9rem;overflow-wrap:anywhere}.node.encoder{border:2px solid var(--accent)}.shared{color:var(--accent);font-size:.85rem;text-align:center;margin:12px 0}.chart-svg{width:100%;height:auto;display:block;background:var(--paper)}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.metric{border-top:2px solid var(--line);padding-top:10px;min-width:0}.metric b{font-size:1.55rem;font-weight:500;display:block;font-variant-numeric:tabular-nums}.metric span{font-size:.8rem;color:var(--muted)}.preset-row{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.status{border-left:3px solid var(--accent);padding:10px 14px;background:var(--soft);font-size:.95rem}.reading-map li{margin-bottom:9px}.code{font: .9rem/1.7 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--bg);padding:16px;border-radius:8px}.formula .roman{font-family:system-ui,sans-serif;font-size:.85rem}.loss-label{display:inline-block;padding:3px 9px;border-radius:5px;background:var(--soft);font-size:.8rem}.metrics.two{grid-template-columns:repeat(2,minmax(0,1fr))}.card h4{font-size:1rem;margin:22px 0 8px}.nowrap{white-space:nowrap}.anchor-nav a{padding:3px 0}svg text{font-family:system-ui,sans-serif}.lab-description{max-width:780px}.legend .dot{width:12px;height:12px;border-radius:50%;display:inline-block}.answer-check{margin-bottom:0}.table-wrap:focus-visible{outline:3px solid #c27a10}.table-wrap table{min-width:470px}button{touch-action:manipulation}.panel{scroll-margin-top:20px}h1{max-width:950px}.source{overflow-wrap:anywhere}
+@media(max-width:760px){.flow{gap:5px}.node{padding:10px;font-size:.85rem}.metrics{gap:8px}.metric b{font-size:1.3rem}.lab-description{font-size:.95rem}}
+@media(max-width:380px){.flow{grid-template-columns:minmax(0,1fr)}.flow .arrow{display:none}.metrics{grid-template-columns:1fr 1fr}.metrics .metric:last-child{grid-column:1/-1}.metrics.two .metric:last-child{grid-column:auto}.brand{font-size:.9rem}.edition{max-width:130px}.hero{padding-top:28px}.lead{font-size:1rem}}
+@media print{.flow{grid-template-columns:1fr auto 1.3fr auto 1fr}.flow .arrow{display:block}.node{padding:6px}.card.wide{break-inside:auto}.scope{font-size:9pt}.card p,.card li{orphans:3;widows:3}.formula{break-inside:avoid}.table-wrap{overflow:visible}.table-wrap table{min-width:0}.source{color:#333}}
+.band-key{background:#c7dfce}.matrix-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0}.matrix-block{background:var(--bg);padding:16px;border:1px solid var(--line);border-radius:8px;min-width:0}.matrix-block h4{margin:0 0 8px;font-size:.9rem}.matrix-block pre{font:clamp(.72rem,1.9vw,.9rem)/1.7 ui-monospace,monospace;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}#gp-data{margin-top:16px}.legend i{flex-shrink:0}.chart-svg{border:1px solid var(--line);border-radius:8px}.formula{overflow-wrap:anywhere}#matrix-mean{max-width:320px}@media(max-width:560px){.matrix-grid{grid-template-columns:1fr}.brand span{display:block}.metrics{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:1/-1}}@media print{.hero .scope{border:0;padding-left:0}.card{break-inside:auto}.checklist{display:block}.table-wrap table{font-size:9pt}}
+.skip-link{position:absolute;top:-100px;left:15px;background:var(--paper);padding:12px;z-index:10}.skip-link:focus{top:10px}body{overflow-wrap:anywhere}.lab-card{margin-bottom:24px}.lab-grid>*{min-width:0}.field input[type=range]{margin:4px 0}.metrics.two .metric b{overflow-wrap:anywhere}.control-note{margin-bottom:5px}.table-wrap th[scope=row]{color:var(--ink)}.lab-card .table-wrap{margin-top:14px}.lab-card td{font-variant-numeric:tabular-nums}.flag-row td{background:var(--soft)}.readout{font-variant-numeric:tabular-nums}.chart-caption{font-size:.8rem;color:var(--muted);margin-top:10px}.scope strong{color:var(--ink)}
+@media(max-width:420px){.tab{white-space:normal}.metric b{font-size:1.2rem}}
+@media print{.skip-link{display:none}.card{break-inside:auto}.table-wrap table{min-width:0}.table-wrap th,.table-wrap td{padding:7px 5px}.formula{break-inside:avoid}}
+.table-wrap table.short-table{min-width:350px}.lab-card .lab-grid>.table-wrap{align-self:start}.legend .key.b{border-radius:0}
+</style></head>
+<body><a class="skip-link" href="#study-modes">Skip to study modes</a>
+<header class="wrap top"><div class="brand">CS473 <span>/ Study companion</span></div><div class="edition">Murphy · §§18.4–18.5.4<br>Printed pp. 610–617</div></header>
+<main class="wrap">
+<div class="hero"><p class="eyebrow">Chapter 18 · Random forests and boosting</p><h1>How tree ensembles learn</h1><p class="lead">A random forest gives trees different split choices. Boosting makes each new learner respond to the current ensemble. Work through what the next learner sees under squared, exponential, and logistic loss.</p>
+<div class="route"><span><b>1</b> Read the core ideas</span><span><b>2</b> Explore five experiments</span><span><b>3</b> Try eight optional checks</span></div>
+<p class="scope"><strong>Assigned reading</strong> · §18.4, the §18.5 introduction, and §§18.5.1–18.5.4, including Algorithm 18.2 at the top of printed p. 617. Printed pp. 610–617 correspond to PDF pp. 640–647. The review stops at the boundary with §18.5.5 on p. 616 and resumes on p. 617 only for Algorithm 18.2. Worked examples and lab data are original.</p></div>
+<nav class="tabs" id="study-modes" role="tablist" tabindex="-1" aria-label="Study modes"><button class="tab" id="review-tab" role="tab" aria-selected="true" aria-controls="review-panel" tabindex="0">Review</button><button class="tab" id="lab-tab" role="tab" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Forest &amp; boosting lab</button><button class="tab" id="quiz-tab" role="tab" aria-selected="false" aria-controls="quiz-panel" tabindex="-1">Learning quiz</button></nav>
+<section class="panel" id="review-panel" role="tabpanel" aria-labelledby="review-tab">
+<div class="section-top"><div><p class="eyebrow muted">The reading map</p><h2>What does the next learner see?</h2><p class="muted">Track which cases and features are available, what target or weights the learner receives, and how its prediction enters the ensemble.</p></div><button class="btn no-print" id="print-review">Print review</button></div>
+<nav class="anchor-nav" aria-label="Review topics"><a href="#forests">Random forests</a><a href="#stagewise">Stagewise fitting</a><a href="#squared">Least squares</a><a href="#margins">Margins and loss</a><a href="#adaboost">AdaBoost</a><a href="#logitboost">LogitBoost</a><a href="#compare">Compare methods</a><a href="#recall">Recall checklist</a></nav>
+<div class="grid">
+<article class="card wide" id="forests">
+<p class="eyebrow">§18.4 · pp. 610–611 / PDF pp. 640–641</p><h2>Random forests vary the split search at each node.</h2>
+<ol>
+<li>Give each tree a randomized training sample. In the standard bootstrap version, draw training rows with replacement for each tree.</li>
+<li>At each node, draw a fresh subset S<sub>i</sub> of the D input features. Search those features and their candidate thresholds for the best split on the cases reaching that node.</li>
+<li>Combine the fitted trees. Average regression predictions. For classification, the aggregation can be a vote or an average of class probabilities followed by a class decision, depending on the implementation.</li>
+</ol>
+<p>If a strong predictor appears at almost every root, bagged trees may reuse its split and make similar errors. Restricting the candidate set gives other features a chance. A smaller set can lower error correlation and can also weaken individual splits when it hides useful features. With all D features eligible, the extra feature restriction disappears and the otherwise matched bootstrap-tree procedure becomes ordinary tree bagging. Each tree can be trained in parallel with the others.</p>
+<div class="grid"><div><h3>Feature eligibility · original example</h3><p>With D = 6 and k = 2, exactly 5 of the 15 equally likely feature pairs include a particular feature. It is eligible with probability 2/6. If two of the six features are useful at this node, the chance of seeing at least one is 1 − C(4,2)/C(6,2) = 9/15 = .60. More generally, for K useful features, replace 4 with D − K and 2 with k in the numerator. A combination count is zero when there are too few features to fill the subset.</p></div>
+<div><h3>Why diversity helps · explanatory model</h3><p>For M prediction errors of equal variance σ² and common pairwise correlation ρ, averaging gives variance σ²[ρ + (1−ρ)/M]. This follows by summing M variances and M(M−1) off-diagonal covariances, then dividing by M². At M = 100 and ρ = .20, the ratio to one error variance is .208. At ρ = .50 it is .505. This model isolates the effect of correlation while holding each learner’s variance fixed.</p></div></div>
+<p><strong>Read the figures as individual experiments.</strong> Figure 18.4 shows a 50-tree forest and a 50-tree bagging ensemble on one two-dimensional dataset, with test accuracies .90 and .91 respectively. Figure 18.5 compares test error versus number of trees for 4,601 labeled emails. The 57 inputs comprise 48 word-frequency features, 6 character-frequency features, and 3 summaries of capital-letter runs. The forest curve improves on bagging in that comparison, and the boosting curve attains lower test error still. Useful split alternatives and lower error correlation are the motivation for the forest design. Neither figure establishes a general ranking or isolates the causal effect of irrelevant features.</p>
+<p class="source">§18.4, Figures 18.4–18.5. The subset calculation and equal-correlation variance model are explanatory examples.</p></article>
+
+<article class="card wide" id="stagewise">
+<p class="eyebrow">§18.5 introduction and §18.5.1 · pp. 611–612 / PDF pp. 641–642</p><h2>Add one fitted correction and freeze it.</h2>
+<p>An additive model sums fitted functions. Each F<sub>m</sub> can be a tree or another function approximator. The model is linear in its component outputs, which can themselves be nonlinear functions of x. For forward stagewise fitting, start from a specified f<sub>0</sub>, then optimize only the next learner and its step size. The loss below measures training fit. The book also allows adding a regularization term.</p>
+<div class="formula">L(f) = ∑<sub>i</sub> ℓ(y<sub>i</sub>, f(x<sub>i</sub>)) <small>· Eq. 18.16</small><br>
+(β<sub>m</sub>, θ<sub>m</sub>) = argmin<sub>β,θ</sub> ∑<sub>i</sub> ℓ(y<sub>i</sub>, f<sub>m−1</sub>(x<sub>i</sub>) + βF(x<sub>i</sub>; θ)) <small>· Eq. 18.17</small><br>
+f<sub>m</sub>(x) = f<sub>m−1</sub>(x) + β<sub>m</sub>F<sub>m</sub>(x) <small>· Eq. 18.18</small></div>
+<p>The earlier learners keep their fitted parameters and weights. The next one is trained with their combined prediction already in place, so changing an earlier stage can change every later stage. With the appropriate weak-learning conditions, successive better-than-chance binary learners can drive down ensemble training error. The condition concerns <strong>current weighted error</strong>, and lower training loss alone gives no guarantee about test error.</p>
+<p>Boosting can improve systematic fit through sequential correction, while randomized averaging primarily targets variance. Those are tendencies. Both bias and variance can change when the learner or its settings change. The number of stages M is a complexity setting. Use a validation curve to choose a stopping point and keep final test data separate.</p>
+<p class="source">§18.5, Eqs. 18.15–18.16 and Figure 18.5. §18.5.1, Eqs. 18.17–18.18.</p></article>
+
+<article class="card wide" id="squared">
+<p class="eyebrow">§18.5.2 · pp. 612–613 / PDF pp. 642–643</p><h2>Fit a tree to the residuals and add its predictions.</h2>
+<p>At stage m, define r<sub>im</sub> = y<sub>i</sub> − f<sub>m−1</sub>(x<sub>i</sub>). The stage objective for squared loss becomes a regression problem with r as the target.</p>
+<div class="formula">[y<sub>i</sub> − (f<sub>m−1</sub>(x<sub>i</sub>) + βF(x<sub>i</sub>))]² = [r<sub>im</sub> − βF(x<sub>i</sub>)]² <small>· Eq. 18.19</small></div>
+<p>Regression trees have freely fitted leaf values, so their scale can absorb β. Set β = 1 and fit F by least squares to r. Each leaf predicts its mean residual. Then add that leaf correction to the <em>old ensemble</em> prediction and recompute every residual. Within each new leaf, the updated residuals have mean zero with a full step. Individual residuals can remain, and further stages can split the cases differently.</p>
+<div class="note"><p><strong>Original worked round.</strong> At x = {1, 2, 3, 4}, let y = {1, 3, 7, 9}. The initial constant f<sub>0</sub> = 5 minimizes squared loss, giving r = {−4, −2, 2, 4}. The best stump splits at 2.5 with leaf means −3 and +3. Thus f<sub>1</sub> = {2, 2, 8, 8} and the new residuals are {−1, 1, −1, 1}. Mean squared training error falls from 10 to 1. At x = 2, the tree outputs −3 and the ensemble outputs 2.</p></div>
+<p>The lab also lets you shrink each fitted correction by a factor η between 0 and 1. For the worked round with η = .5, predictions would be {3.5, 3.5, 6.5, 6.5} with MSE 3.25. This is a learning-rate extension to Eq. 18.19’s full-step fit. Changing η changes the residuals used in future fits.</p>
+<p class="source">§18.5.2, Eq. 18.19 and Figure 18.6. The book illustrates depth-2 trees. The worked example and lab use stumps so their fits are easy to audit.</p></article>
+
+<article class="card wide" id="margins">
+<p class="eyebrow">§18.5.3 · pp. 613–614 / PDF pp. 643–644</p><h2>Two losses react differently to the same mistake.</h2>
+<p>Use labels ỹ ∈ {−1,+1} and a real score f(x). The sign predicts the class, with a tie rule needed at zero. The signed margin u = ỹf(x) is positive for a correct sign and negative for an incorrect one. When f represents <strong>half</strong> the log odds, π(x) = P(y = +1|x) = σ(2f(x)), where σ(a) = 1/(1 + e<sup>−a</sup>). This link concerns the real score, while discrete AdaBoost’s individual voters return only ±1.</p>
+<div class="formula">Exponential loss ℓ<sub>exp</sub>(u) = e<sup>−u</sup> <small>· Eq. 18.22</small><br>
+Log loss ℓ<sub>log</sub>(u) = ln(1 + e<sup>−2u</sup>) <small>· Eq. 18.21, in nats</small></div>
+<p>When u is very negative, log loss is approximately −2u with a slope magnitude bounded by 2. Exponential loss grows as e<sup>|u|</sup>, and its slope magnitude grows at the same rate. For u = −4, the losses are approximately 54.598 and 8.0003. A badly misclassified point, including a possible label error, can therefore exert much greater influence under exponential loss.</p>
+<p><strong>Population link.</strong> Fix x and let p be its true positive-class probability. The expected exponential loss is p e<sup>−f</sup> + (1−p)e<sup>f</sup>. Setting its derivative to zero gives e<sup>2f*</sup> = p/(1−p). Thus both exponential loss and log loss have the same unrestricted population minimizer f* = ½ ln[p/(1−p)] for 0 &lt; p &lt; 1. At p = 0 or 1 the optimum is approached as f tends to the corresponding infinity. For p = .8, f* = ½ ln 4 ≈ .6931. The population argument does not establish that a finite-stage, finite-data AdaBoost score is calibrated.</p>
+<div class="note"><p><strong>Figure 18.7 uses base 2 for its log-loss curve.</strong> Divide the natural-log curve by ln 2 to get that scale. The base-2 loss is at least 1 when u ≤ 0, so it upper-bounds the 0–1 loss under either convention at a zero margin. Natural-log loss at u = 0 is ln 2 &lt; 1. Exponential loss is already at least 1 for u ≤ 0.</p></div>
+<p class="source">§18.5.3, Eqs. 18.20–18.25 and Figure 18.7. See also Friedman, Hastie and Tibshirani (2000), §4.2, for the population argument.</p></article>
+
+<article class="card wide" id="adaboost">
+<p class="eyebrow">§18.5.3 · pp. 614–616 / PDF pp. 644–646</p><h2>AdaBoost changes who matters in the next classification fit.</h2>
+<p>Let h = F<sub>m</sub> be a hard ±1 classifier. Expanding the stage loss shows that the existing ensemble gives each case a weight proportional to e<sup>−ỹᵢfₘ₋₁(xᵢ)</sup>. Let W be total weight and ε the weighted fraction of cases h misclassifies. Then L<sub>m</sub> = W[(1−ε)e<sup>−β</sup> + εe<sup>β</sup>]. For a positive step β, a smaller ε lowers L<sub>m</sub>, so first fit a classifier to minimize weighted mistakes. Differentiating in β gives the second step.</p>
+<div class="formula">ε = [∑<sub>i</sub> ω<sub>i</sub> I(ỹ<sub>i</sub> ≠ h(x<sub>i</sub>))] / ∑<sub>i</sub> ω<sub>i</sub><br>
+β = ½ ln[(1−ε)/ε], &nbsp; f<sub>m</sub> = f<sub>m−1</sub> + βh<br>
+ω′<sub>i</sub> ∝ ω<sub>i</sub> e<sup>−βỹᵢh(xᵢ)</sup> <small>· Eqs. 18.26–18.35</small></div>
+<p>A correct prediction multiplies its raw weight by e<sup>−β</sup>. A mistake multiplies it by e<sup>β</sup>. Multiplying all new weights by the common factor e<sup>β</sup> gives the equivalent update in Algorithm 18.1. Leave correct weights as they were, multiply mistakes by e<sup>α</sup>, and use α = 2β. Normalizing afterwards is optional for the weighted error formula, which already divides by total weight. The sign of ∑α<sub>m</sub>h<sub>m</sub> equals the sign of ∑β<sub>m</sub>h<sub>m</sub>. The two raw scores differ by a factor of two.</p>
+<div class="note"><p><strong>Original worked round.</strong> Six cases start at weight 1/6. If the stump misses only case 5, ε = 1/6, β = ½ ln 5 ≈ .8047, and α = ln 5. In the α convention the five correct cases keep raw weight 1/6 while case 5 gets 5/6. After normalization, each correct case has weight .10 and case 5 has .50. Under an exact full step, total weight on the cases missed by the current stump becomes .50 and the other .50 sits on cases that stump got right. Later stumps train on this new distribution.</p></div>
+<p>At ε = .5, the coefficient is zero. A worse-than-chance learner has a negative coefficient under the unconstrained formula. If the hypothesis family includes its flipped predictions, use the flipped learner and error 1−ε to retain a positive step. At ε = 0 the unregularized optimum is an infinite step, so the finite formula needs an edge-case rule such as stopping. A lower weighted error below .5 gives a stronger vote. The book also mentions Real AdaBoost for probability-valued base learners and SAMME as a multiclass extension.</p>
+<p class="source">§18.5.3, Eqs. 18.26–18.35 and Algorithm 18.1. The finite-step weight balance follows by substituting the optimal β into the two loss terms.</p></article>
+
+<article class="card wide" id="logitboost">
+<p class="eyebrow">§18.5.4 · pp. 616–617 / PDF pp. 646–647</p><h2>LogitBoost fits a Newton step by weighted regression.</h2>
+<p>Use y* ∈ {0,1} with y* = (ỹ+1)/2. Start with f<sub>0</sub> = 0 and π<sub>i</sub> = .5. Let g = 2f be the log-odds score, so π<sub>i</sub> = σ(g(x<sub>i</sub>)). The first two derivatives of Bernoulli negative log likelihood with respect to g are π<sub>i</sub> − y*<sub>i</sub> and π<sub>i</sub>(1−π<sub>i</sub>). The local quadratic objective therefore gives this update.</p>
+<ol>
+<li>Compute curvature weights w<sub>i</sub> = π<sub>i</sub>(1−π<sub>i</sub>) and working responses z<sub>i</sub> = (y*<sub>i</sub> − π<sub>i</sub>)/w<sub>i</sub>.</li>
+<li>Fit a real-valued learner F<sub>m</sub> by minimizing ∑<sub>i</sub> w<sub>i</sub>[z<sub>i</sub> − F(x<sub>i</sub>)]². This estimates the increment in g. In a tree leaf, the weighted mean is ∑ w<sub>i</sub>z<sub>i</sub>/∑ w<sub>i</sub> = ∑(y*<sub>i</sub> − π<sub>i</sub>)/∑ w<sub>i</sub>, with sums restricted to that leaf.</li>
+<li>Update f ← f + ½F<sub>m</sub> (equivalently g ← g + F<sub>m</sub>). Recompute π = σ(2f) before the next round. Threshold π at .5 or take the sign of f for the hard decision. The book also points to a multiclass generalization.</li>
+</ol>
+<div class="grid"><div><h3>One leaf · original calculation</h3><p>With three positive cases and one negative case, all at π = .5, the weights are .25 and z = {2, 2, 2, −2}. The constant correction is F = 1. A full Newton step gives f = .5 and π = σ(1) ≈ .7311.</p></div><div><h3>A confident mistake</h3><p>For y* = 1 and π = .01, w = .0099 and z = 100, but w·z = .99. A small curvature weight can accompany a large working response. In a leaf the denominator ∑w controls the Newton step. Very small curvature can make it large, and the local quadratic approximation can be poor far from the current score.</p></div></div>
+<p>LogitBoost uses a Bernoulli likelihood, so σ(2f) is its modeled probability. The book’s warning about recovering probabilities with exponential loss refers to the absence of that likelihood. The population mapping in Eq. 18.25 still exists. Applying that mapping to a fitted AdaBoost half-score can produce a probability estimate, whose calibration needs separate evidence.</p>
+<p class="source">§18.5.4, Eqs. 18.36–18.37 and Algorithm 18.2. The Newton derivation uses the full log odds g for clarity. See also Friedman, Hastie and Tibshirani (2000), §4.3.</p></article>
+
+<article class="card wide" id="compare"><p class="eyebrow">Compare the fits</p><h2>Three objectives, three jobs for the next learner</h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Boosting methods compared"><table><thead><tr><th scope="col">Method</th><th scope="col">What the learner fits</th><th scope="col">What enters the score</th><th scope="col">What changes for the next fit</th></tr></thead><tbody>
+<tr><th scope="row">Least-squares boosting</th><td>Regression on y − f with ordinary least squares</td><td>F, or ηF with shrinkage</td><td>Residual targets</td></tr>
+<tr><th scope="row">Discrete AdaBoost</th><td>Weighted classification with labels ±1</td><td>βh where h ∈ {−1,+1}</td><td>Weights from signed margins</td></tr>
+<tr><th scope="row">LogitBoost</th><td>Weighted regression on Newton working responses z</td><td>½F on the half-log-odds scale</td><td>Probabilities, curvature weights, and working responses</td></tr>
+</tbody></table></div>
+<p class="source">Synthesis of §§18.5.2–18.5.4. Random forests train trees independently given the data and their random draws. Every boosting row conditions the next fit on the current ensemble.</p></article>
+
+<article class="card wide" id="recall"><p class="eyebrow">Recall checklist</p><h2>Try explaining these aloud.</h2><ol>
+<li>Where does row sampling happen in a random forest? Where does feature sampling happen?</li>
+<li>Why can a smaller candidate feature set lower both correlation and the quality of an individual split?</li>
+<li>What stays fixed when a new stage is fitted? What is recomputed afterward?</li>
+<li>Can you find the leaf’s residual mean and distinguish it from the new ensemble prediction?</li>
+<li>Given ε = .20, find β and the relative weight multiplier for a mistake versus a correct case.</li>
+<li>Why does LogitBoost fit real working responses, and why does only half the fitted correction enter f?</li>
+</ol></article>
+</div></section>
+<section class="panel" id="lab-panel" role="tabpanel" aria-labelledby="lab-tab" hidden>
+<div class="section-top"><div><p class="eyebrow muted">Five original experiments</p><h2>Inspect the next fit.</h2><p class="muted">Explore a forest’s feature choices, then step through three boosting algorithms. Each experiment uses its own small, fixed teaching dataset.</p></div></div>
+<nav class="anchor-nav" aria-label="Lab experiments"><a href="#forest-lab">Feature sampling</a><a href="#squared-lab">Residual fitting</a><a href="#ada-lab">AdaBoost weights</a><a href="#loss-lab">Margin losses</a><a href="#logit-lab">LogitBoost step</a></nav>
+
+<article class="card lab-card" id="forest-lab"><p class="eyebrow">01 · §18.4</p><h2>Which features get to compete?</h2>
+<p>Hold the cases in a single node fixed. Each of its six features has a supplied best split gain. Choose how many distinct candidates the node draws uniformly, then step through the equally likely subsets. The first two features have the highest gains.</p>
+<div class="lab-grid"><div>
+<div class="field"><div class="value-row"><label for="forest-k">Candidate features k</label><output id="forest-k-value" for="forest-k">2</output></div><input type="range" id="forest-k" min="1" max="6" step="1" value="2"></div>
+<div class="preset-row"><button class="btn" id="forest-prev" type="button">Previous subset</button><button class="btn" id="forest-next" type="button">Next subset</button><button class="btn quiet" id="forest-all" type="button">Allow all features</button></div>
+<p class="status" id="forest-status" role="status"></p>
+<div class="metrics"><div class="metric"><b id="forest-top"></b><span>Chance best feature is available</span></div><div class="metric"><b id="forest-two"></b><span>Chance either top feature is available</span></div><div class="metric"><b id="forest-gain"></b><span>Mean winning gain over all subsets</span></div></div>
+</div><div class="table-wrap" tabindex="0" role="region" aria-label="Features and winning probabilities"><table class="short-table"><thead><tr><th scope="col">Feature</th><th scope="col">Gain</th><th scope="col">This subset</th><th scope="col">Chance of winning</th></tr></thead><tbody id="forest-rows"></tbody></table></div></div>
+<p class="lab-insight"><strong>Try k = 1, then k = 6.</strong> With one candidate, a weak feature can win because stronger features are unavailable. With six, the same feature always wins at this fixed node. The table describes split opportunities under these gains. Whole-forest accuracy and error correlation also depend on the data, tree shapes, and other nodes.</p></article>
+
+<article class="card lab-card" id="squared-lab"><p class="eyebrow">02 · §§18.5.1–18.5.2</p><h2>Fit the residual and keep the old prediction.</h2>
+<p>The starting prediction is the mean response. Each stage fits an actual stump by minimizing squared error on the current residuals over every midpoint between consecutive x values. The leftmost split wins ties. The plot shows the fitted ensemble functions and the training responses.</p>
+<div class="lab-grid"><div>
+<div class="field"><label for="sq-data">Training responses</label><select id="sq-data"><option value="worked">Four-point worked example</option><option value="steps">Eight-point staircase</option></select></div>
+<div class="field"><div class="value-row"><label for="sq-stage">Stage m</label><output id="sq-stage-value" for="sq-stage">1</output></div><input type="range" id="sq-stage" min="1" max="8" step="1" value="1"></div>
+<div class="field"><div class="value-row"><label for="sq-eta">Correction fraction η</label><output id="sq-eta-value" for="sq-eta">1.00</output></div><input type="range" id="sq-eta" min="0.1" max="1" step="0.05" value="1"></div>
+<div class="preset-row"><button class="btn" id="sq-full" type="button">Full worked round</button><button class="btn" id="sq-half" type="button">Half worked round</button></div>
+</div><div><div class="chart-frame"><svg class="chart-svg" id="sq-chart" viewBox="0 0 520 228" role="img" aria-label="Training responses and ensemble prediction before and after the selected stage"></svg></div>
+<div class="legend" aria-hidden="true"><span><i class="dot" style="background:#173b3d"></i>Observed y</span><span><i class="key b"></i>Before (dashed)</span><span><i class="key"></i>After (solid)</span></div>
+<div class="metrics two"><div class="metric"><b id="sq-before"></b><span>Training MSE before</span></div><div class="metric"><b id="sq-after"></b><span>Training MSE after</span></div></div></div></div>
+<p class="status" id="sq-status" role="status"></p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Residual fitting case by case"><table><thead><tr><th scope="col">x</th><th scope="col">Target y</th><th scope="col">Old score</th><th scope="col">Residual r</th><th scope="col">Stump F</th><th scope="col">New score</th><th scope="col">New residual</th></tr></thead><tbody id="sq-rows"></tbody></table></div>
+<p class="lab-insight"><strong>Try a half step at m = 1, then advance m.</strong> The stump’s first fitted leaf values stay the same. Shrinking its contribution changes the ensemble and therefore the training targets for stage 2.</p></article>
+
+<article class="card lab-card" id="ada-lab"><p class="eyebrow">03 · §18.5.3, Algorithm 18.1</p><h2>Follow the weight of each AdaBoost case.</h2>
+<p>Six cases start with equal weight. The lab fits the lowest-weighted-error stump at each stage, testing both polarities of each threshold and allowing constant classifiers. Ties use the first candidate in threshold order, with the positive-right rule first. The half-score uses β, and the table shows weights normalized to sum to 1.</p>
+<div class="lab-grid"><div><div class="field"><div class="value-row"><label for="ada-stage">Stage m</label><output id="ada-stage-value" for="ada-stage">1</output></div><input type="range" id="ada-stage" min="1" max="8" step="1" value="1"></div><div class="preset-row"><button class="btn" id="ada-first" type="button">First round</button><button class="btn" id="ada-second" type="button">Second round</button></div></div>
+<div><div class="metrics"><div class="metric"><b id="ada-error"></b><span>Stump’s weighted error ε</span></div><div class="metric"><b id="ada-beta"></b><span>Vote coefficient β</span></div><div class="metric"><b id="ada-ratio"></b><span>Mistake vs. correct multiplier e<sup>2β</sup></span></div></div><p class="small muted readout" id="ada-summary"></p></div></div>
+<p class="status" id="ada-status" role="status"></p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="AdaBoost weights and margins by case"><table><thead><tr><th scope="col">x</th><th scope="col">Label ỹ</th><th scope="col">Stump h</th><th scope="col">Stump result</th><th scope="col">Old weight</th><th scope="col">New weight</th><th scope="col">New score f</th><th scope="col">New margin ỹf</th></tr></thead><tbody id="ada-rows"></tbody></table></div>
+<p class="lab-insight"><strong>Go from round 1 to round 2.</strong> Case 5 carries half the next round’s weight after its first mistake. The next stump can change its rule even though the original cases and labels stay fixed. The status line separates the stump’s weighted error from the ensemble’s ordinary training mistakes.</p></article>
+
+<article class="card lab-card" id="loss-lab"><p class="eyebrow">04 · §18.5.3, Figure 18.7</p><h2>Move from a small mistake to a confident one.</h2>
+<p>Compare loss values and the magnitude of their slope for the same signed margin u = ỹf. The chart spaces vertical ticks by ln(1 + loss) so both curves remain readable. Tick labels and numeric outputs report loss values, with natural logarithms for log loss.</p>
+<div class="lab-grid"><div><div class="field"><div class="value-row"><label for="loss-margin">Signed margin u</label><output id="loss-margin-value" for="loss-margin">−2.00</output></div><input type="range" id="loss-margin" min="-4" max="4" step="0.05" value="-2"></div>
+<div class="preset-row"><button class="btn" id="loss-wrong" type="button">Confident mistake</button><button class="btn" id="loss-tie" type="button">At the boundary</button><button class="btn" id="loss-right" type="button">Confident correct</button></div>
+<p class="status" id="loss-status" role="status"></p>
+<div class="metrics two"><div class="metric"><b id="loss-exp"></b><span>Exponential loss</span></div><div class="metric"><b id="loss-log"></b><span>Log loss in nats</span></div></div>
+<p class="small readout" id="loss-slope"></p></div><div>
+<div class="chart-frame"><svg class="chart-svg" id="loss-chart" viewBox="0 0 520 228" role="img" aria-label="Exponential and logistic loss versus signed margin, with a logarithmically spaced loss axis"></svg></div>
+<div class="legend" aria-hidden="true"><span><i class="key"></i>Exponential (solid)</span><span><i class="key b"></i>Logistic (dashed)</span></div></div></div>
+<p class="lab-insight"><strong>Compare u = −4 and u = 0.</strong> The exponential slope gets much steeper on the negative side. The slope of log loss approaches a magnitude of 2. A strongly negative margin matters under both losses, but much more under exponential loss.</p></article>
+
+<article class="card lab-card" id="logit-lab"><p class="eyebrow">05 · §18.5.4, Algorithm 18.2</p><h2>Fit one LogitBoost Newton correction.</h2>
+<p>Use the same six labels recoded as 0 or 1. Supply current probabilities, compute a working response z and curvature weight w for every case, then fit the best weighted regression stump. The leftmost threshold wins ties. The displayed update is one Newton round from the supplied scores.</p>
+<div class="lab-grid"><div>
+<div class="field"><label for="logit-start">Starting probabilities</label><select id="logit-start"><option value="neutral">Neutral · all .50</option><option value="mixed">Mixed · adjust case 5</option></select></div>
+<div class="field"><div class="value-row"><label for="logit-p">Case 5 probability of class 1</label><output id="logit-p-value" for="logit-p">0.50</output></div><input type="range" id="logit-p" min="0.01" max="0.99" step="0.01" value="0.80" disabled><p class="small muted control-note">Case 5 has label 0. Select Mixed to change its starting probability.</p></div>
+<div class="preset-row"><button class="btn" id="logit-neutral" type="button">Neutral start</button><button class="btn" id="logit-confident" type="button">Confident mistake</button></div>
+</div><div><div class="metrics two"><div class="metric"><b id="logit-before"></b><span>Mean training log loss before</span></div><div class="metric"><b id="logit-after"></b><span>Mean training log loss after</span></div></div>
+<p class="status" id="logit-status" role="status"></p><p class="small readout" id="logit-case"></p></div></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="LogitBoost working responses, weights, and updated predictions"><table><thead><tr><th scope="col">x</th><th scope="col">Label y*</th><th scope="col">Old π</th><th scope="col">Weight w</th><th scope="col">Target z</th><th scope="col">Stump F</th><th scope="col">Half-score change</th><th scope="col">New π</th></tr></thead><tbody id="logit-rows"></tbody></table></div>
+<p class="lab-insight"><strong>Compare the neutral and mixed starts.</strong> At π = .50 every case has w = .25 and z is either +2 or −2. At π = .99 for case 5, w = .0099 and z = −100. Follow that case’s leaf prediction and new π. The curvature-weighted fit still incorporates case 5 through the product w·z.</p></article>
+</section>
+<section class="panel" id="quiz-panel" role="tabpanel" aria-labelledby="quiz-tab" hidden><div class="quiz-shell">
+<div id="quiz-start"><p class="eyebrow muted">Learning quiz</p><h2>A quick check, when you’re ready.</h2><p class="quiz-intro muted">Eight optional practice questions help you check the main ideas. Each question offers a hint. After you answer, you’ll see the reasoning and a textbook reference.</p><div class="card"><h3>Set your focus</h3><div class="quiz-config"><div class="field"><label for="quiz-focus">Question set</label><select id="quiz-focus"><option value="all">Main ideas · 8 questions</option><option value="forests">Random forests · 2 questions</option><option value="stagewise">Stagewise and least squares · 2 questions</option><option value="classification">AdaBoost and LogitBoost · 4 questions</option></select></div><button class="btn primary" id="start-quiz">Start learning quiz</button></div><p class="small muted">First answers determine your score. Explanations stay available in the final review, and missed questions can be retried. Progress lasts for this open page session.</p></div><div class="note"><p class="small">This is an optional learning check. Revisit the notes or experiments between questions. Your current round stays in place when you switch tabs.</p></div></div>
+<div id="quiz-active" hidden><div class="quiz-status"><span id="question-count"></span><span id="quiz-score"></span></div><div class="quiz-progress" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" id="question-progress"><div id="question-progress-fill"></div></div><div class="card"><span class="tag" id="question-section"></span><h2 class="question" id="question-text" tabindex="-1"></h2><div class="options" id="question-options" role="group" aria-labelledby="question-text"></div><div class="hint" id="question-hint" hidden></div><div class="feedback" id="question-feedback" role="status" aria-live="polite" hidden></div><div class="quiz-actions"><button class="btn quiet" id="show-hint">Show hint</button><button class="btn primary" id="next-question" disabled>Next question →</button></div></div></div>
+<div id="quiz-results" hidden aria-live="polite"></div>
+</div></section></main>
+<footer class="wrap"><div class="footer"><p><strong>Textbook</strong> · Kevin P. Murphy, <cite>Probabilistic Machine Learning: An Introduction</cite>, online version April 18, 2025. Checked against the local CS473 PDF. §18.4 and the §18.5 introduction, printed pp. 610–612 / PDF pp. 640–642. §§18.5.1–18.5.4, printed pp. 612–617 / PDF pp. 642–647, with p. 617 used for Algorithm 18.2.</p>
+<p><strong>Supplemental reference</strong> · Friedman, Hastie and Tibshirani, <cite>Additive Logistic Regression: A Statistical View of Boosting</cite>, <cite>The Annals of Statistics</cite> 28(2), 2000, §§4.2–4.3. DOI 10.1214/aos/1016218223.</p>
+<p>Original study notes, worked examples, experiments, and questions. The guide works offline. Quiz progress lasts while the page stays open. Print the review from the Review tab.</p></div></footer>
+<script type="application/json" id="quiz-data">[
+  {
+    "group": "forests",
+    "section": "18.4",
+    "page": "610",
+    "topic": "Sampling unit",
+    "q": "How does the random forest in §18.4 restrict a tree's split search?",
+    "a": [
+      "Draw a new subset of training rows at every node and keep every feature eligible.",
+      "Use a randomized training sample per tree and draw a fresh feature subset at each node.",
+      "Draw one feature subset for the entire forest and reuse it at every node.",
+      "Choose the next tree's candidate features based on errors from the previous tree."
+    ],
+    "correct": 1,
+    "hint": "Separate the sampling of training rows from the sampling of feature columns.",
+    "why": "Training rows are randomized per tree. At each node, a newly drawn feature subset limits which split dimensions compete. The tree still evaluates thresholds for those eligible features."
+  },
+  {
+    "group": "forests",
+    "section": "18.4",
+    "page": "610",
+    "topic": "Candidate availability",
+    "q": "Two of six features are useful at a given node. If you draw two distinct features uniformly, what is the chance that at least one useful feature is available?",
+    "a": [
+      "2/6",
+      "4/6",
+      "1/15",
+      "9/15"
+    ],
+    "correct": 3,
+    "hint": "Count pairs with no useful feature, then take the complement.",
+    "why": "There are C(6,2) = 15 pairs. C(4,2) = 6 consist entirely of the four other features. The desired probability is 1 − 6/15 = 9/15. This is about eligibility, before choosing a split."
+  },
+  {
+    "group": "stagewise",
+    "section": "18.5.1",
+    "page": "612",
+    "topic": "Stagewise fitting",
+    "q": "When you fit stage m, what does the stagewise objective let you change?",
+    "a": [
+      "The new learner and its coefficient, with the previously fitted sum held fixed.",
+      "The new learner and every older coefficient at once.",
+      "All earlier learners, with the new learner held fixed.",
+      "Only the training responses, with the model held fixed."
+    ],
+    "correct": 0,
+    "hint": "In Eq. 18.17, fₘ₋₁ is already known. Which quantities appear in the argmin?",
+    "why": "The optimization varies β and θ for the new term βF. It adds that term to the fixed fₘ₋₁. This is why a stage depends on prior stages without refitting them."
+  },
+  {
+    "group": "stagewise",
+    "section": "18.5.2",
+    "page": "612",
+    "topic": "Residual update",
+    "q": "In a squared-loss boosting stage, one case has y = 8 and an old prediction of 5. Its new stump leaf predicts a mean residual of 2. What is the case's new residual with a full step?",
+    "a": [
+      "3",
+      "2",
+      "1",
+      "−2"
+    ],
+    "correct": 2,
+    "hint": "Add the leaf value to the old prediction first. Then compute y minus the new prediction.",
+    "why": "The ensemble prediction becomes 5 + 2 = 7, so the new residual is 8 − 7 = 1. The leaf fits a shared mean residual and need not eliminate each case's residual."
+  },
+  {
+    "group": "classification",
+    "section": "18.5.3",
+    "page": "614",
+    "topic": "Loss and margins",
+    "q": "What happens to the two losses as a negative signed margin becomes very negative?",
+    "a": [
+      "Both grow exponentially at the same rate.",
+      "Exponential loss grows exponentially, while log loss grows approximately linearly.",
+      "Log loss grows exponentially, while exponential loss grows approximately linearly.",
+      "Both flatten because the predicted sign is already wrong."
+    ],
+    "correct": 1,
+    "hint": "For a large positive t, ln(1 + eᵗ) is close to t.",
+    "why": "With u ≪ 0, e⁻ᵘ grows exponentially while ln(1 + e⁻²ᵘ) is close to −2u. The exponential slope also grows, which gives strongly misclassified cases more influence."
+  },
+  {
+    "group": "classification",
+    "section": "18.5.3",
+    "page": "615",
+    "topic": "AdaBoost weights",
+    "q": "A stump has weighted error ε = .20. Under the α convention of Algorithm 18.1, how much do its misclassified cases get multiplied by relative to its correct cases?",
+    "a": [
+      "0.25×",
+      "2×",
+      "5×",
+      "4×"
+    ],
+    "correct": 3,
+    "hint": "The ratio of mistake to correct multipliers is eᵅ, with α = ln[(1−ε)/ε].",
+    "why": "The ratio is (.80)/(.20) = 4. Equivalently β = ½ ln 4 = ln 2. The symmetric update multiplies mistakes by 2 and correct cases by 1/2, for the same relative factor of 4."
+  },
+  {
+    "group": "classification",
+    "section": "18.5.4",
+    "page": "617",
+    "topic": "Newton working response",
+    "q": "A LogitBoost case has y* = 1 and current π = .20. What are its working response z and its weight w?",
+    "a": [
+      "z = 5 and w = .16",
+      "z = .8 and w = .20",
+      "z = 4 and w = .16",
+      "z = −5 and w = .80"
+    ],
+    "correct": 0,
+    "hint": "Multiply π by (1−π) for w. Divide y*−π by that w for z.",
+    "why": "Curvature w = .20 × .80 = .16. The numerator y*−π is .80, so z = .80/.16 = 5. The regression learner fits that working response with weight .16."
+  },
+  {
+    "group": "classification",
+    "section": "18.5.4",
+    "page": "617",
+    "topic": "Log-odds scale",
+    "q": "The current LogitBoost half-score is f = 0 at a point and the weighted regression stump gives F = 2 there. What probability does the full Newton update give?",
+    "a": [
+      "σ(0) = .50",
+      "σ(1) ≈ .731",
+      "σ(2) ≈ .881",
+      "σ(4) ≈ .982"
+    ],
+    "correct": 2,
+    "hint": "The stump estimates an increment in 2f. Add half of it to f, then use π = σ(2f).",
+    "why": "The updated half-score is 1. The full log odds are 2 and the new probability is σ(2). Feeding 1 into σ directly would lose the factor of two. Adding all of F to f would count it twice."
+  }
+]</script>
+<script>
+
+
+(() => {
+'use strict';
+const $=id=>document.getElementById(id), tabs=[...document.querySelectorAll('[role="tab"]')];
+function selectTab(tab){tabs.forEach(t=>{const active=t===tab;t.setAttribute('aria-selected',String(active));t.tabIndex=active?0:-1;$(t.getAttribute('aria-controls')).hidden=!active;});}
+tabs.forEach((tab,index)=>{tab.addEventListener('click',()=>selectTab(tab));tab.addEventListener('keydown',e=>{let next;if(e.key==='ArrowRight')next=(index+1)%tabs.length;if(e.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;if(e.key==='Home')next=0;if(e.key==='End')next=tabs.length-1;if(next!==undefined){e.preventDefault();selectTab(tabs[next]);tabs[next].focus();}});});
+$('print-review').addEventListener('click',()=>window.print());
+const sum = values => values.reduce((total, value) => total + value, 0);
+const mean = values => sum(values) / values.length;
+const square = value => value * value;
+const fmt = (value, digits = 4) => (Math.abs(value) < 0.5 * 10 ** -digits ? 0 : value).toFixed(digits);
+const pct = value => fmt(value * 100, 1) + '%';
+const show = (id, value) => { $(id).textContent = String(value); };
+const val = id => Number($(id).value);
+
+function rows(id, entries, marked = []) {
+  $(id).replaceChildren(...entries.map((values, i) => {
+    const tr = document.createElement('tr');
+    if (marked[i]) tr.className = 'flag-row';
+    values.forEach((value, j) => {
+      const cell = document.createElement(j === 0 ? 'th' : 'td');
+      if (j === 0) cell.setAttribute('scope', 'row');
+      cell.textContent = String(value);
+      tr.append(cell);
+    });
+    return tr;
+  }));
+}
+
+function listen(ids, event, render) {
+  ids.forEach(id => $(id).addEventListener(event, render));
+}
+
+function preset(id, values, render) {
+  $(id).addEventListener('click', () => {
+    for (const [key, value] of Object.entries(values)) $(key).value = String(value);
+    render();
+  });
+}
+
+// Random feature search at a single node. Gains are supplied in descending order.
+const featureGains = [.36, .26, .18, .08, .03, .01];
+function featureSubsets(k) {
+  const subsets = [];
+  function visit(prefix, start) {
+    if (prefix.length === k) {
+      subsets.push(prefix);
+      return;
+    }
+    const remaining = k - prefix.length;
+    for (let i = start; i <= featureGains.length - remaining; i++) visit([...prefix, i], i + 1);
+  }
+  visit([], 0);
+  return subsets;
+}
+function forestStats(k) {
+  const subsets = featureSubsets(k);
+  const counts = featureGains.map(() => 0);
+  subsets.forEach(indices => counts[indices[0]]++);
+  return {
+    subsets,
+    probabilities: counts.map(count => count / subsets.length),
+    gain: mean(subsets.map(indices => featureGains[indices[0]]))
+  };
+}
+
+let subsetIndex = 0;
+function renderForest() {
+  const k = val('forest-k');
+  const { subsets, probabilities, gain } = forestStats(k);
+  subsetIndex = (subsetIndex + subsets.length) % subsets.length;
+  const selected = subsets[subsetIndex];
+  const winner = selected[0];
+  show('forest-k-value', k);
+  show('forest-top', pct(probabilities[0]));
+  show('forest-two', pct(probabilities[0] + probabilities[1]));
+  show('forest-gain', fmt(gain));
+  show('forest-status', `Subset ${subsetIndex + 1} of ${subsets.length}. Feature ${winner + 1} has the best gain among the available candidates.`);
+  rows('forest-rows', featureGains.map((value, i) => [
+    `Feature ${i + 1}`, fmt(value, 2), i === winner ? 'Winner' : selected.includes(i) ? 'Eligible' : 'Unavailable', pct(probabilities[i])
+  ]), featureGains.map((_, i) => i === winner));
+  $('forest-next').disabled = subsets.length === 1;
+  $('forest-prev').disabled = subsets.length === 1;
+}
+listen(['forest-k'], 'input', () => { subsetIndex = 0; renderForest(); });
+$('forest-next').addEventListener('click', () => { subsetIndex++; renderForest(); });
+$('forest-prev').addEventListener('click', () => { subsetIndex--; renderForest(); });
+preset('forest-all', { 'forest-k': 6 }, () => { subsetIndex = 0; renderForest(); });
+
+// The examples use ordered x = 1, ..., N and test all interior cut positions.
+function regressionStump(targets, weights) {
+  let best = { cost: Infinity };
+  const products = targets.map((target, i) => target * weights[i]);
+  for (let cut = 1; cut < targets.length; cut++) {
+    const leftW = weights.slice(0, cut);
+    const rightW = weights.slice(cut);
+    const left = sum(products.slice(0, cut)) / sum(leftW);
+    const right = sum(products.slice(cut)) / sum(rightW);
+    const fit = targets.map((_, i) => i < cut ? left : right);
+    const cost = sum(targets.map((target, i) => weights[i] * square(target - fit[i])));
+    if (cost < best.cost - 1e-12) best = { cut, left, right, fit, cost };
+  }
+  return best;
+}
+
+const regressionData = {
+  worked: [1, 3, 7, 9],
+  steps: [1, 2, 1, 2, 6, 7, 9, 10]
+};
+
+function squaredStage(targets, eta, stage) {
+  const weights = targets.map(() => 1);
+  const baseline = mean(targets);
+  let scores = targets.map(() => baseline);
+  let result;
+  for (let m = 1; m <= stage; m++) {
+    const old = scores;
+    const residual = targets.map((y, i) => y - old[i]);
+    const stump = regressionStump(residual, weights);
+    scores = old.map((value, i) => value + eta * stump.fit[i]);
+    const nextResidual = targets.map((y, i) => y - scores[i]);
+    result = { old, residual, stump, scores, nextResidual, before: mean(residual.map(square)), after: mean(nextResidual.map(square)) };
+  }
+  return result;
+}
+
+// SVG charts have equivalent numeric readouts or tables next to them.
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function svg(tag, attrs, label) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+  if (label !== undefined) node.textContent = String(label);
+  return node;
+}
+const chartInk = '#173b3d';
+const chartGreen = '#176b58';
+const chartGold = '#936b16';
+const chartLine = '#ccd9d1';
+const plot = { left: 48, right: 492, top: 22, bottom: 177 };
+const line = (x1, y1, x2, y2, stroke, extra = {}) => svg('line', { x1, y1, x2, y2, stroke, ...extra });
+const label = (x, y, value, align = 'middle') => svg('text', { x, y, fill: chartInk, 'text-anchor': align, 'font-size': 13 }, value);
+const points = samples => samples.map(([x, y]) => `${x},${y}`).join(' ');
+function series(samples, stroke, dashed = false) {
+  return svg('polyline', {
+    points: points(samples), fill: 'none', stroke, 'stroke-width': 2.6,
+    'stroke-linejoin': 'round', 'stroke-dasharray': dashed ? '6 5' : 'none'
+  });
+}
+function dot(x, y, fill) {
+  return svg('circle', { cx: x, cy: y, r: 4, fill, stroke: '#fffef9', 'stroke-width': 1.4 });
+}
+function axes(x, xTicks, y, yTicks, xTitle, yTitle) {
+  const { left, right, top, bottom } = plot;
+  return [
+    ...yTicks.flatMap(tick => [line(left, y(tick), right, y(tick), chartLine), label(left - 6, y(tick) + 4, tick, 'end')]),
+    line(left, top, left, bottom, chartInk),
+    line(left, bottom, right, bottom, chartInk),
+    ...xTicks.map(tick => label(x(tick), bottom + 19, tick)),
+    label((left + right) / 2, 218, xTitle),
+    label(left, 15, yTitle, 'start')
+  ];
+}
+
+function squaredChart(targets, old, scores) {
+  const { left, right, top, bottom } = plot;
+  const max = Math.ceil(Math.max(...targets, ...old, ...scores) / 2) * 2;
+  const min = Math.min(0, Math.floor(Math.min(...targets, ...old, ...scores) / 2) * 2);
+  const x = value => left + (right - left) * (value - .5) / targets.length;
+  const y = value => bottom - (bottom - top) * (value - min) / (max - min);
+  const trace = values => values.flatMap((value, i) => [[x(i + .5), y(value)], [x(i + 1.5), y(value)]]);
+  const xt = targets.map((_, i) => i + 1);
+  const yt = Array.from({ length: (max - min) / 2 + 1 }, (_, i) => min + 2 * i);
+  $('sq-chart').replaceChildren(
+    ...axes(x, xt, y, yt, 'Input x', 'Response'),
+    series(trace(scores), chartGreen), series(trace(old), chartGold, true),
+    ...targets.map((target, i) => dot(x(i + 1), y(target), chartInk))
+  );
+}
+function renderSquared() {
+  const targets = regressionData[$('sq-data').value];
+  const eta = val('sq-eta');
+  const stage = val('sq-stage');
+  const r = squaredStage(targets, eta, stage);
+  show('sq-eta-value', fmt(eta, 2));
+  show('sq-stage-value', stage);
+  show('sq-before', fmt(r.before));
+  show('sq-after', fmt(r.after));
+  show('sq-status', `Stage ${stage} splits at x = ${r.stump.cut + .5}. The stump predicts ${fmt(r.stump.left)} on the left and ${fmt(r.stump.right)} on the right. Add ${fmt(eta, 2)} × that value to the old prediction.`);
+  rows('sq-rows', targets.map((y, i) => [
+    i + 1, y, fmt(r.old[i]), fmt(r.residual[i]), fmt(r.stump.fit[i]), fmt(r.scores[i]), fmt(r.nextResidual[i])
+  ]));
+  squaredChart(targets, r.old, r.scores);
+}
+listen(['sq-data'], 'change', renderSquared);
+listen(['sq-eta', 'sq-stage'], 'input', renderSquared);
+preset('sq-full', { 'sq-data': 'worked', 'sq-stage': 1, 'sq-eta': 1 }, renderSquared);
+preset('sq-half', { 'sq-data': 'worked', 'sq-stage': 1, 'sq-eta': .5 }, renderSquared);
+
+// Discrete AdaBoost on a fixed nonseparable-by-one-stump sample.
+const binaryLabels = [-1, -1, 1, 1, -1, 1];
+function classificationStump(labels, weights) {
+  let best = { error: Infinity };
+  for (let cut = 0; cut < labels.length; cut++) {
+    for (const right of [1, -1]) {
+      const fit = labels.map((_, i) => i < cut ? -right : right);
+      const missed = labels.map((y, i) => y !== fit[i]);
+      const error = sum(weights.filter((_, i) => missed[i]));
+      if (error < best.error - 1e-12) best = { cut, right, fit, missed, error };
+    }
+  }
+  return best;
+}
+function adaStage(stage) {
+  let weights = binaryLabels.map(() => 1 / binaryLabels.length);
+  let scores = binaryLabels.map(() => 0);
+  let result;
+  for (let m = 1; m <= stage; m++) {
+    const old = weights;
+    const stump = classificationStump(binaryLabels, old);
+    const beta = .5 * Math.log((1 - stump.error) / stump.error);
+    scores = scores.map((score, i) => score + beta * stump.fit[i]);
+    const updated = old.map((weight, i) => weight * Math.exp(stump.missed[i] ? beta : -beta));
+    const total = sum(updated);
+    weights = updated.map(weight => weight / total);
+    const margins = binaryLabels.map((y, i) => y * scores[i]);
+    result = { old, stump, beta, weights, scores, margins };
+  }
+  return result;
+}
+function signLabel(n) { return n > 0 ? '+1' : '−1'; }
+function renderAda() {
+  const stage = val('ada-stage');
+  const r = adaStage(stage);
+  const h = r.stump;
+  const rule = h.cut === 0 ? `constant ${signLabel(h.right)}` : `x ≤ ${h.cut + .5} → ${signLabel(-h.right)} and x > ${h.cut + .5} → ${signLabel(h.right)}`;
+  const mistakes = binaryLabels.filter((y, i) => y !== (r.scores[i] >= 0 ? 1 : -1)).length;
+  show('ada-stage-value', stage);
+  show('ada-error', pct(h.error));
+  show('ada-beta', fmt(r.beta));
+  show('ada-ratio', fmt(Math.exp(2 * r.beta), 3) + '×');
+  show('ada-status', `Stage ${stage} stump rule · ${rule}. The combined ensemble makes ${mistakes} of 6 training mistakes after this update (score ties predict +1).`);
+  show('ada-summary', `After the update, the cases missed by this stump carry ${pct(sum(r.weights.filter((_, i) => h.missed[i])))} of the total weight.`);
+  rows('ada-rows', binaryLabels.map((y, i) => [
+    i + 1, signLabel(y), signLabel(h.fit[i]), h.missed[i] ? 'Miss' : 'Correct', fmt(r.old[i]), fmt(r.weights[i]), fmt(r.scores[i]), fmt(r.margins[i])
+  ]), h.missed);
+}
+listen(['ada-stage'], 'input', renderAda);
+preset('ada-first', { 'ada-stage': 1 }, renderAda);
+preset('ada-second', { 'ada-stage': 2 }, renderAda);
+
+function marginLoss(u) {
+  const exp = Math.exp(-u);
+  const log = Math.log1p(Math.exp(-2 * u));
+  return { exp, log, expSlope: exp, logSlope: 2 / (1 + Math.exp(2 * u)) };
+}
+function renderLoss() {
+  const u = val('loss-margin');
+  const losses = marginLoss(u);
+  const { left, right, top, bottom } = plot;
+  const x = value => left + (right - left) * (value + 4) / 8;
+  const y = value => bottom - (bottom - top) * Math.log1p(value) / Math.log1p(55);
+  const grid = Array.from({ length: 161 }, (_, i) => i / 20 - 4);
+  const lossCurve = key => grid.map(value => [x(value), y(marginLoss(value)[key])]);
+  $('loss-chart').replaceChildren(
+    ...axes(x, [-4, -2, 0, 2, 4], y, [0, 1, 3, 10, 30, 55], 'Signed margin u', 'Loss (log-spaced)'),
+    line(x(u), top, x(u), bottom, chartInk, { 'stroke-dasharray': '3 4' }),
+    series(lossCurve('exp'), chartGreen), series(lossCurve('log'), chartGold, true),
+    dot(x(u), y(losses.exp), chartGreen), dot(x(u), y(losses.log), chartGold)
+  );
+  show('loss-margin-value', fmt(u, 2));
+  show('loss-exp', fmt(losses.exp));
+  show('loss-log', fmt(losses.log));
+  show('loss-status', u < 0 ? 'The sign is wrong.' : u > 0 ? 'The sign is correct.' : 'A zero score is on the decision boundary.');
+  show('loss-slope', `Slope magnitudes · exponential ${fmt(losses.expSlope)} · logistic ${fmt(losses.logSlope)}.`);
+}
+listen(['loss-margin'], 'input', renderLoss);
+preset('loss-wrong', { 'loss-margin': -4 }, renderLoss);
+preset('loss-tie', { 'loss-margin': 0 }, renderLoss);
+preset('loss-right', { 'loss-margin': 4 }, renderLoss);
+
+// Fit the Newton response on the full-log-odds scale, then convert to a half-score update.
+function logitStep(probabilities) {
+  const labels = binaryLabels.map(y => (y + 1) / 2);
+  const weights = probabilities.map(p => p * (1 - p));
+  const targets = probabilities.map((p, i) => (labels[i] - p) / weights[i]);
+  const stump = regressionStump(targets, weights);
+  const next = probabilities.map((p, i) => {
+    const oldLogOdds = Math.log(p / (1 - p));
+    return 1 / (1 + Math.exp(-oldLogOdds - stump.fit[i]));
+  });
+  const loss = ps => mean(ps.map((p, i) => labels[i] === 1 ? -Math.log(p) : -Math.log1p(-p)));
+  return { labels, weights, targets, stump, next, before: loss(probabilities), after: loss(next) };
+}
+function renderLogit() {
+  const mixed = $('logit-start').value === 'mixed';
+  $('logit-p').disabled = !mixed;
+  const probabilities = mixed ? [.2, .35, .55, .65, val('logit-p'), .6] : binaryLabels.map(() => .5);
+  const r = logitStep(probabilities);
+  show('logit-p-value', fmt(probabilities[4], 2));
+  show('logit-before', fmt(r.before));
+  show('logit-after', fmt(r.after));
+  show('logit-status', `Split at x = ${r.stump.cut + .5}. The fitted log-odds increments are ${fmt(r.stump.left)} on the left and ${fmt(r.stump.right)} on the right. Add half of the increment to f.`);
+  show('logit-case', `Case 5 contributes w·z = ${fmt(r.weights[4] * r.targets[4])} to its leaf numerator. Its curvature contributes ${fmt(r.weights[4])} to the denominator.`);
+  rows('logit-rows', probabilities.map((p, i) => [
+    i + 1, r.labels[i], fmt(p), fmt(r.weights[i]), fmt(r.targets[i]), fmt(r.stump.fit[i]), fmt(r.stump.fit[i] / 2), fmt(r.next[i])
+  ]), probabilities.map((_, i) => i === 4));
+}
+listen(['logit-start'], 'change', renderLogit);
+listen(['logit-p'], 'input', renderLogit);
+preset('logit-neutral', { 'logit-start': 'neutral' }, renderLogit);
+preset('logit-confident', { 'logit-start': 'mixed', 'logit-p': .99 }, renderLogit);
+
+renderForest();
+renderSquared();
+renderAda();
+renderLoss();
+renderLogit();
+const questions=JSON.parse($('quiz-data').textContent);
+let deck=[],answers=[],position=0,answered=false;
+function startQuiz(pool){deck=pool.slice();answers=[];position=0;$('quiz-start').hidden=true;$('quiz-results').hidden=true;$('quiz-active').hidden=false;renderQuestion();$('question-text').focus();}
+function renderQuestion(){answered=false;const q=deck[position],correctSoFar=answers.filter(a=>a.correct).length;$('question-count').textContent='Question '+(position+1)+' of '+deck.length;$('quiz-score').textContent=correctSoFar+' correct / '+answers.length+' answered';$('question-section').textContent='§'+q.section+' · '+q.topic;$('question-text').textContent=q.q;$('question-hint').hidden=true;$('question-hint').textContent=q.hint;$('question-feedback').hidden=true;$('show-hint').hidden=false;$('show-hint').disabled=false;$('show-hint').textContent='Show hint';$('next-question').disabled=true;$('next-question').textContent=position===deck.length-1?'See results →':'Next question →';$('question-progress').setAttribute('aria-valuemax',deck.length);setProgress(answers.length);const options=$('question-options');options.replaceChildren();q.a.forEach((text,i)=>{const b=document.createElement('button');b.type='button';b.className='option';const letter=document.createElement('span');letter.className='letter';letter.textContent='ABCD'[i];letter.setAttribute('aria-hidden','true');const label=document.createElement('span');label.textContent=text;b.append(letter,label);b.addEventListener('click',()=>answerQuestion(i));options.append(b);});}
+function setProgress(n){$('question-progress').setAttribute('aria-valuenow',n);$('question-progress-fill').style.width=(100*n/deck.length)+'%';}
+function answerQuestion(selected){if(answered)return;answered=true;const q=deck[position],correct=selected===q.correct;answers.push({q,selected,correct});[...$('question-options').children].forEach((b,i)=>{b.disabled=true;if(i===q.correct||i===selected){b.classList.add(i===q.correct?'correct':'wrong');const status=document.createElement('span');status.className='option-state';status.textContent=i===q.correct?(i===selected?'Your answer · Correct':'Correct answer'):'Your answer · Incorrect';b.lastElementChild.append(status);}});const fb=$('question-feedback');fb.replaceChildren();fb.className='feedback'+(correct?'':' wrong');const title=document.createElement('strong');title.textContent=correct?'Correct. Here’s why.':'Not quite. Here’s the reasoning.';const explanation=document.createElement('p');explanation.textContent=q.why;const ref=document.createElement('p');ref.className='small muted';ref.textContent='Review §'+q.section+' · textbook p. '+q.page;fb.append(title,explanation,ref);fb.hidden=false;$('show-hint').hidden=true;$('next-question').disabled=false;setProgress(answers.length);$('quiz-score').textContent=answers.filter(a=>a.correct).length+' correct / '+answers.length+' answered';}
+$('start-quiz').addEventListener('click',()=>{const focus=$('quiz-focus').value;startQuiz(questions.filter(q=>focus==='all'||q.group===focus));});
+$('show-hint').addEventListener('click',()=>{$('question-hint').hidden=false;$('show-hint').disabled=true;$('show-hint').textContent='Hint shown';});
+$('next-question').addEventListener('click',()=>{if(!answered)return;if(position===deck.length-1)showResults();else{position++;renderQuestion();$('question-text').focus();}});
+function showResults(){
+ $('quiz-active').hidden=true;const container=$('quiz-results');container.replaceChildren();container.hidden=false;const correct=answers.filter(a=>a.correct).length,missed=answers.filter(a=>!a.correct).map(a=>a.q);
+ const intro=document.createElement('div');intro.className='card';const eyebrow=document.createElement('p');eyebrow.className='eyebrow muted';eyebrow.textContent='Practice complete';const heading=document.createElement('h2');heading.textContent=missed.length?'You have a focused review plan.':'All concepts answered correctly.';const score=document.createElement('p');score.className='score-number';score.textContent=correct+' / '+deck.length;const caption=document.createElement('p');caption.className='muted';caption.textContent=Math.round(100*correct/deck.length)+'% correct on first answers in this round.';intro.append(eyebrow,heading,score,caption);
+ const actions=document.createElement('div');actions.className='result-actions';if(missed.length){const retry=document.createElement('button');retry.className='btn primary';retry.textContent='Retry '+missed.length+' missed question'+(missed.length===1?'':'s');retry.addEventListener('click',()=>startQuiz(missed));actions.append(retry);}const again=document.createElement('button');again.className='btn'+(missed.length?'':' primary');again.textContent='Choose a new round';again.addEventListener('click',()=>{container.hidden=true;$('quiz-start').hidden=false;$('start-quiz').focus();});const review=document.createElement('button');review.className='btn quiet';review.textContent='Return to review';review.addEventListener('click',()=>{selectTab($('review-tab'));$('review-tab').focus();});actions.append(again,review);intro.append(actions);container.append(intro);
+ const title=document.createElement('h3');title.style.marginTop='32px';title.textContent='Your answers, with explanations';container.append(title);
+ answers.forEach((answer,i)=>{const item=document.createElement('div');item.className='review-item';const tag=document.createElement('p');tag.className='tag';tag.textContent=(answer.correct?'Correct':'Review this')+' · §'+answer.q.section+' · p. '+answer.q.page;const question=document.createElement('h3');question.textContent=(i+1)+'. '+answer.q.q;const yours=document.createElement('p');yours.className='small';yours.textContent='Your answer: '+answer.q.a[answer.selected];item.append(tag,question,yours);if(!answer.correct){const right=document.createElement('p');right.className='small';right.textContent='Correct answer: '+answer.q.a[answer.q.correct];item.append(right);}const explanation=document.createElement('p');explanation.className='small muted';explanation.textContent=answer.q.why;item.append(explanation);container.append(item);});
+ container.scrollIntoView({block:'start',behavior:'auto'});heading.tabIndex=-1;heading.focus();
+}
+
+})();
+</script></body></html>
